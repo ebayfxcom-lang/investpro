@@ -114,3 +114,27 @@ INSERT IGNORE INTO `spin_rewards` (`slot`, `label`, `reward_type`, `reward_value
 (10, '$2 Credit',    'usd',          2.00,  10.000000, '#0891b2'),
 (11, '2 Free Spins', 'spin_credits', 2.00,   2.000000, '#7c3aed'),
 (12, '$50 Jackpot',  'usd',         50.00,   1.000000, '#b91c1c');
+
+-- Update email template variables to include new placeholders
+UPDATE `email_templates`
+SET `variables` = 'site_name,username,full_name,email,whatsapp,balance,active_balance,total_deposits,total_withdrawals,total_earnings,referral_earnings,date'
+WHERE `slug` = 'welcome';
+
+UPDATE `email_templates`
+SET `variables` = 'username,amount,currency,plan_name,roi_percent,roi_period,balance,total_deposits,date,site_name'
+WHERE `slug` = 'deposit_confirmed';
+
+UPDATE `email_templates`
+SET `variables` = 'username,amount,currency,balance,total_withdrawals,date,site_name'
+WHERE `slug` = 'withdrawal_approved';
+
+UPDATE `email_templates`
+SET `variables` = 'username,site_name,date'
+WHERE `slug` = 'password_changed';
+
+-- Insert new account stats email template
+INSERT IGNORE INTO `email_templates` (`slug`, `name`, `subject`, `body`, `variables`) VALUES
+('account_stats', 'Account Statistics',
+ 'Your {site_name} Account Summary',
+ '<h2>Account Summary for {username}</h2><table style="width:100%;border-collapse:collapse"><tr><td style="padding:8px;border:1px solid #eee"><strong>Current Balance:</strong></td><td style="padding:8px;border:1px solid #eee">{balance}</td></tr><tr><td style="padding:8px;border:1px solid #eee"><strong>Active Deposits:</strong></td><td style="padding:8px;border:1px solid #eee">{active_balance}</td></tr><tr><td style="padding:8px;border:1px solid #eee"><strong>Total Deposits:</strong></td><td style="padding:8px;border:1px solid #eee">{total_deposits}</td></tr><tr><td style="padding:8px;border:1px solid #eee"><strong>Total Withdrawals:</strong></td><td style="padding:8px;border:1px solid #eee">{total_withdrawals}</td></tr><tr><td style="padding:8px;border:1px solid #eee"><strong>Total Earnings:</strong></td><td style="padding:8px;border:1px solid #eee">{total_earnings}</td></tr><tr><td style="padding:8px;border:1px solid #eee"><strong>Referral Earnings:</strong></td><td style="padding:8px;border:1px solid #eee">{referral_earnings}</td></tr></table><p>WhatsApp: {whatsapp}</p><p>Report Date: {date}</p>',
+ 'site_name,username,full_name,email,whatsapp,balance,active_balance,total_deposits,total_withdrawals,total_earnings,referral_earnings,date');
