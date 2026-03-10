@@ -78,7 +78,12 @@ INSERT IGNORE INTO `faq` (`question`, `answer`, `sort_order`, `status`) VALUES
  'We use bank-grade security including 256-bit SSL encryption, two-factor authentication, and cold storage for crypto assets.',
  5, 'active');
 
--- Default admin user (password: Admin@123456 - CHANGE THIS IMMEDIATELY)
+-- Default admin user
+-- ⚠️  SECURITY: password is Admin@123456 hashed with Argon2id.
+--     This hash uses a fixed salt for portability in seed data only.
+--     You MUST change the admin password immediately after first login
+--     via the admin panel so a properly salted hash is stored.
+--     NEVER reuse this hash value in production.
 INSERT IGNORE INTO `users` (`username`, `email`, `password`, `role`, `status`, `referral_code`, `email_verified`, `created_at`) VALUES
 ('admin',
  'admin@investpro.com',
