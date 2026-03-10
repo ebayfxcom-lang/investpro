@@ -94,6 +94,7 @@ $router->post('/admin/settings/referral', [Admin\SettingsController::class, 'ref
 $router->get('/admin/settings/currencies', [Admin\SettingsController::class, 'currencies']);
 $router->get('/admin/settings/email-templates', [Admin\SettingsController::class, 'emailTemplates']);
 $router->get('/admin/settings/security', [Admin\SettingsController::class, 'security']);
+$router->post('/admin/settings/security', [Admin\SettingsController::class, 'security']);
 
 // Earnings
 $router->get('/admin/earnings', [Admin\EarningsController::class, 'index']);

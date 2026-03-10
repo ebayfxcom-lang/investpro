@@ -37,5 +37,38 @@ foreach ([
 }
 
 // Load and resolve routes
-$router = require ROOT_DIR . '/routes/web.php';
-$router->resolve($request);
+try {
+    $router = require ROOT_DIR . '/routes/web.php';
+    $router->resolve($request);
+} catch (\Throwable $e) {
+    $logDir = ROOT_DIR . '/storage/logs';
+    if (is_dir($logDir)) {
+        $logFile = $logDir . '/error.log';
+        $logLine = '[' . date('Y-m-d H:i:s') . '] ' . get_class($e) . ': ' . $e->getMessage()
+            . ' in ' . $e->getFile() . ':' . $e->getLine() . PHP_EOL;
+        error_log($logLine, 3, $logFile);
+    }
+
+    if ($appConfig['debug'] ?? false) {
+        http_response_code(500);
+        echo '<pre><strong>' . htmlspecialchars(get_class($e)) . '</strong>: '
+            . htmlspecialchars($e->getMessage()) . "\n\n"
+            . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+    } else {
+        http_response_code(500);
+        echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+            . '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            . '<title>500 – Server Error</title>'
+            . '<style>body{font-family:Segoe UI,sans-serif;background:#f0f2f5;display:flex;'
+            . 'align-items:center;justify-content:center;min-height:100vh;margin:0}'
+            . '.box{background:#fff;border-radius:12px;padding:3rem;text-align:center;'
+            . 'box-shadow:0 4px 24px rgba(0,0,0,.08);max-width:480px}'
+            . 'h1{color:#dc2626;margin-bottom:.5rem}p{color:#6b7280}'
+            . 'a{color:#1e40af;text-decoration:none}'
+            . '</style></head><body>'
+            . '<div class="box"><h1>500 – Internal Server Error</h1>'
+            . '<p>Something went wrong on our end. Please try again in a few moments.</p>'
+            . '<p><a href="/">Return to homepage</a></p></div>'
+            . '</body></html>';
+    }
+}

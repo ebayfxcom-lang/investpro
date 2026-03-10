@@ -23,7 +23,7 @@
           <tr>
             <td class="text-muted small">{$r.id}</td>
             <td>{$r.referrer_id}</td>
-            <td>{$r.user_id|default:'—'}</td>
+            <td>{$r.referee_id|default:'—'}</td>
             <td class="fw-semibold">${$r.amount|string_format:"%.2f"}</td>
             <td><span class="badge badge-status-{$r.status}">{$r.status|ucfirst}</span></td>
             <td class="text-muted small">{$r.created_at|date_format:'%b %d, %Y %H:%M'}</td>

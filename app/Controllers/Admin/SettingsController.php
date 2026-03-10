@@ -79,27 +79,55 @@ class SettingsController extends Controller
     public function currencies(Request $request): void
     {
         $this->requireAuth('admin');
+        $currencyModel = new \App\Models\CurrencyModel();
         $this->view('admin/settings/currencies', [
-            'title' => 'Currencies',
-            'admin' => Auth::user('admin'),
+            'title'      => 'Currencies',
+            'currencies' => $currencyModel->findAll('', [], 'sort_order ASC, code ASC'),
+            'admin'      => Auth::user('admin'),
         ]);
     }
 
     public function emailTemplates(Request $request): void
     {
         $this->requireAuth('admin');
+        $emailTemplateModel = new \App\Models\EmailTemplateModel();
         $this->view('admin/settings/email-templates', [
-            'title' => 'Email Templates',
-            'admin' => Auth::user('admin'),
+            'title'     => 'Email Templates',
+            'templates' => $emailTemplateModel->findAll('', [], 'name ASC'),
+            'admin'     => Auth::user('admin'),
         ]);
     }
 
     public function security(Request $request): void
     {
         $this->requireAuth('admin');
+        $settingsModel = new SettingsModel();
+        $settings = $settingsModel->getAll();
+
+        if ($request->isPost()) {
+            if (!Csrf::validateRequest($request)) {
+                $this->flash('error', 'Invalid CSRF token.');
+                $this->redirect('/admin/settings/security');
+            }
+            $allowed = ['two_factor_enabled', 'email_verification', 'registration_enabled',
+                        'maintenance_mode', 'maintenance_message'];
+            $data = [];
+            foreach ($allowed as $key) {
+                $val = $request->post($key);
+                if ($val !== null) {
+                    $data[$key] = $val;
+                }
+            }
+            $settingsModel->setMany($data);
+            (new AuditLog())->log('security_settings_updated', 'Security settings updated', Auth::id('admin'), $request->ip());
+            $this->flash('success', 'Security settings saved.');
+            $this->redirect('/admin/settings/security');
+        }
+
         $this->view('admin/settings/security', [
-            'title' => 'Security Settings',
-            'admin' => Auth::user('admin'),
+            'title'    => 'Security Settings',
+            'settings' => $settings,
+            'admin'    => Auth::user('admin'),
         ]);
     }
 }
