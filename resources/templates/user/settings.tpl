@@ -34,7 +34,56 @@
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Country</label>
-              <input type="text" name="country" class="form-control" value="{$user.country|escape}" placeholder="Your country">
+              <select name="country" class="form-select">
+                <option value="">Select your country...</option>
+                {foreach [
+                  'US'=>'United States','GB'=>'United Kingdom','CA'=>'Canada',
+                  'AU'=>'Australia','DE'=>'Germany','FR'=>'France',
+                  'NG'=>'Nigeria','ZA'=>'South Africa','GH'=>'Ghana',
+                  'KE'=>'Kenya','IN'=>'India','PK'=>'Pakistan',
+                  'BR'=>'Brazil','MX'=>'Mexico','Other'=>'Other'
+                ] as $code => $name}
+                <option value="{$code}"{if $user.country == $code} selected{/if}>{$name}</option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">WhatsApp Number <span class="text-danger">*</span></label>
+              <input type="tel" name="whatsapp_number" class="form-control"
+                     value="{$user.whatsapp_number|escape}" placeholder="+1 234 567 8900" required>
+              <div class="form-text">Used for account notifications.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Facebook Profile <span class="text-muted small">(optional)</span></label>
+              <input type="url" name="facebook_url" class="form-control"
+                     value="{$user.facebook_url|escape}" placeholder="https://facebook.com/yourprofile">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Preferred Currency</label>
+              <select name="preferred_currency" class="form-select">
+                {foreach ['USD'=>'USD - US Dollar','EUR'=>'EUR - Euro','BTC'=>'BTC - Bitcoin','ETH'=>'ETH - Ethereum','USDT'=>'USDT - Tether'] as $code => $label}
+                <option value="{$code}"{if $user.preferred_currency == $code} selected{/if}>{$label}</option>
+                {/foreach}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Communication Preferences</label>
+              <div class="mt-2 d-flex flex-column gap-1">
+                {foreach ['email'=>'Email only','whatsapp'=>'WhatsApp only','both'=>'Email &amp; WhatsApp'] as $val => $lbl}
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="communication_prefs"
+                         id="cp_{$val}" value="{$val}"
+                         {if $user.communication_prefs == $val}checked{elseif !$user.communication_prefs && $val == 'email'}checked{/if}>
+                  <label class="form-check-label" for="cp_{$val}">{$lbl}</label>
+                </div>
+                {/foreach}
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Payout Details <span class="text-muted small">(optional)</span></label>
+              <textarea name="payout_details" class="form-control" rows="3"
+                        placeholder="Bank account number, crypto wallet address, etc.">{$user.payout_details|escape}</textarea>
+              <div class="form-text">Your preferred payout method details for withdrawals.</div>
             </div>
           </div>
 

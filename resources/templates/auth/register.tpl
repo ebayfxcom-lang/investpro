@@ -26,6 +26,50 @@
     <input type="password" name="password_confirm" class="form-control" placeholder="Repeat password" required>
   </div>
 
+  <div class="mb-3">
+    <label class="form-label fw-semibold">WhatsApp Number <span class="text-danger">*</span></label>
+    <input type="tel" name="whatsapp_number" class="form-control" placeholder="+1 234 567 8900" required>
+    <div class="form-text text-muted">We'll use this for account notifications.</div>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Country</label>
+    <select name="country" class="form-select">
+      <option value="">Select your country...</option>
+      <option value="US">United States</option>
+      <option value="GB">United Kingdom</option>
+      <option value="CA">Canada</option>
+      <option value="AU">Australia</option>
+      <option value="DE">Germany</option>
+      <option value="FR">France</option>
+      <option value="NG">Nigeria</option>
+      <option value="ZA">South Africa</option>
+      <option value="GH">Ghana</option>
+      <option value="KE">Kenya</option>
+      <option value="IN">India</option>
+      <option value="PK">Pakistan</option>
+      <option value="BR">Brazil</option>
+      <option value="MX">Mexico</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Preferred Currency</label>
+    <select name="preferred_currency" class="form-select">
+      <option value="USD">USD - US Dollar</option>
+      <option value="EUR">EUR - Euro</option>
+      <option value="BTC">BTC - Bitcoin</option>
+      <option value="ETH">ETH - Ethereum</option>
+      <option value="USDT">USDT - Tether</option>
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Facebook Profile <span class="text-muted small">(optional)</span></label>
+    <input type="url" name="facebook_url" class="form-control" placeholder="https://facebook.com/yourprofile">
+  </div>
+
   {if $ref}
   <input type="hidden" name="ref" value="{$ref|escape}">
   <div class="alert alert-info small py-2">

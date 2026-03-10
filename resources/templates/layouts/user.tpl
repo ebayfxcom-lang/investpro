@@ -48,6 +48,7 @@
     <div class="nav-divider"></div>
     <a class="nav-link" href="/user/earnings"><i class="fas fa-coins"></i> Earnings</a>
     <a class="nav-link" href="/user/referrals"><i class="fas fa-share-nodes"></i> Referrals</a>
+    <a class="nav-link" href="/user/spin"><i class="fas fa-gamepad"></i> Spin &amp; Earn</a>
     <div class="nav-divider"></div>
     <a class="nav-link" href="/user/withdraw"><i class="fas fa-money-bill-wave"></i> Withdraw Funds</a>
     <a class="nav-link" href="/user/withdrawals"><i class="fas fa-clock-rotate-left"></i> Withdraw History</a>
