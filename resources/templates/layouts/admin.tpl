@@ -61,11 +61,16 @@
     <a class="nav-link" href="/admin/settings"><i class="fas fa-cog"></i> Settings</a>
     <a class="nav-link" href="/admin/settings/referral"><i class="fas fa-percent"></i> Referral Settings</a>
     <a class="nav-link" href="/admin/settings/currencies"><i class="fas fa-dollar-sign"></i> Currencies</a>
+    <a class="nav-link" href="/admin/currencies"><i class="fas fa-coins"></i> Currency Manager</a>
+    <a class="nav-link" href="/admin/exchange-rates"><i class="fas fa-chart-bar"></i> Exchange Rates</a>
+    <a class="nav-link" href="/admin/currencies/price-history"><i class="fas fa-clock-rotate-left"></i> Price History</a>
     <a class="nav-link" href="/admin/settings/email-templates"><i class="fas fa-envelope"></i> Email Templates</a>
     <a class="nav-link" href="/admin/settings/security"><i class="fas fa-shield-halved"></i> Security</a>
     <a class="nav-link" href="/admin/faq"><i class="fas fa-question-circle"></i> FAQ Manager</a>
     <a class="nav-link" href="/admin/news"><i class="fas fa-newspaper"></i> News</a>
     <a class="nav-link" href="/admin/pages"><i class="fas fa-file-alt"></i> Custom Pages</a>
+    <a class="nav-link" href="/admin/spin"><i class="fas fa-gamepad"></i> Spin Rewards</a>
+    <a class="nav-link" href="/admin/spin/history"><i class="fas fa-history"></i> Spin History</a>
 
     <div class="nav-section">System</div>
     <a class="nav-link" href="/admin/newsletter"><i class="fas fa-mail-bulk"></i> Newsletter</a>

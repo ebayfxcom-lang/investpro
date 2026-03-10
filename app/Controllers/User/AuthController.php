@@ -36,6 +36,13 @@ class AuthController extends Controller
                     $this->redirect('/login');
                 }
                 Auth::login($user, 'user');
+                // Grant daily free spins
+                try {
+                    (new \App\Services\SpinService())->grantDailyFreeSpins((int)$user['id']);
+                } catch (\Throwable $e) {
+                    // Non-critical, log and continue
+                    error_log('SpinService::grantDailyFreeSpins failed: ' . $e->getMessage());
+                }
                 (new AuditLog())->log('user_login', 'User logged in', (int)$user['id'], $request->ip());
                 $this->redirect('/user/dashboard');
             }
