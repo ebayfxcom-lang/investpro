@@ -58,6 +58,7 @@ $router->get('/admin/dashboard', [Admin\DashboardController::class, 'index']);
 
 // Users
 $router->get('/admin/users', [Admin\UsersController::class, 'index']);
+$router->get('/admin/users/add-funds', [Admin\AddFundsController::class, 'index']);
 $router->get('/admin/users/{id}', [Admin\UsersController::class, 'view']);
 $router->post('/admin/users/{id}/toggle-status', [Admin\UsersController::class, 'toggleStatus']);
 $router->get('/admin/users/{id}/add-funds', [Admin\UsersController::class, 'addFunds']);
@@ -93,5 +94,40 @@ $router->post('/admin/settings/referral', [Admin\SettingsController::class, 'ref
 $router->get('/admin/settings/currencies', [Admin\SettingsController::class, 'currencies']);
 $router->get('/admin/settings/email-templates', [Admin\SettingsController::class, 'emailTemplates']);
 $router->get('/admin/settings/security', [Admin\SettingsController::class, 'security']);
+
+// Earnings
+$router->get('/admin/earnings', [Admin\EarningsController::class, 'index']);
+
+// Blacklist
+$router->get('/admin/blacklist', [Admin\BlacklistController::class, 'index']);
+$router->post('/admin/blacklist/add', [Admin\BlacklistController::class, 'add']);
+$router->post('/admin/blacklist/{id}/remove', [Admin\BlacklistController::class, 'remove']);
+
+// Referral Earnings
+$router->get('/admin/referrals', [Admin\ReferralEarningsController::class, 'index']);
+
+// FAQ
+$router->get('/admin/faq', [Admin\FaqController::class, 'index']);
+
+// News
+$router->get('/admin/news', [Admin\NewsController::class, 'index']);
+
+// Custom Pages
+$router->get('/admin/pages', [Admin\PagesController::class, 'index']);
+
+// Newsletter
+$router->get('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
+
+// Performance
+$router->get('/admin/performance', [Admin\PerformanceController::class, 'index']);
+
+// IP Checks
+$router->get('/admin/ip-checks', [Admin\IpChecksController::class, 'index']);
+$router->post('/admin/ip-checks/block', [Admin\IpChecksController::class, 'block']);
+$router->post('/admin/ip-checks/{id}/unblock', [Admin\IpChecksController::class, 'unblock']);
+
+// Admin Profile
+$router->get('/admin/profile', [Admin\ProfileController::class, 'index']);
+$router->post('/admin/profile', [Admin\ProfileController::class, 'index']);
 
 return $router;
