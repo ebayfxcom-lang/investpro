@@ -12,6 +12,7 @@ use App\Models\WithdrawalModel;
 use App\Models\WalletModel;
 use App\Models\TransactionModel;
 use App\Models\SettingsModel;
+use App\Services\ConversionService;
 
 class WithdrawalController extends Controller
 {
@@ -56,15 +57,22 @@ class WithdrawalController extends Controller
 
             $walletModel->debit($userId, $currency, $amount);
 
+            // Build conversion snapshot
+            $conversionService = new ConversionService();
+            $snapshot = $conversionService->buildSnapshot($amount, $currency);
+
             $withdrawalModel = new WithdrawalModel();
             $wId = $withdrawalModel->create([
-                'user_id'    => $userId,
-                'amount'     => $amount,
-                'currency'   => $currency,
-                'method'     => $method,
-                'address'    => $address,
-                'status'     => 'pending',
-                'created_at' => date('Y-m-d H:i:s'),
+                'user_id'       => $userId,
+                'amount'        => $amount,
+                'currency'      => $currency,
+                'method'        => $method,
+                'address'       => $address,
+                'status'        => 'pending',
+                'created_at'    => date('Y-m-d H:i:s'),
+                'usd_amount'    => $snapshot['usd_amount'],
+                'eur_amount'    => $snapshot['eur_amount'],
+                'rate_snapshot' => $snapshot['rate_snapshot'],
             ]);
 
             $transModel = new TransactionModel();

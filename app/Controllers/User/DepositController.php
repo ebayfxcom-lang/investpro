@@ -12,6 +12,7 @@ use App\Models\PlanModel;
 use App\Models\DepositModel;
 use App\Models\WalletModel;
 use App\Models\TransactionModel;
+use App\Services\ConversionService;
 
 class DepositController extends Controller
 {
@@ -51,17 +52,25 @@ class DepositController extends Controller
             }
 
             $walletModel->debit($userId, $currency, $amount);
+
+            // Build conversion snapshot
+            $conversionService = new ConversionService();
+            $snapshot = $conversionService->buildSnapshot($amount, $currency);
+
             $expiresAt = date('Y-m-d H:i:s', strtotime("+{$plan['duration_days']} days"));
 
             $depositModel = new DepositModel();
             $depositId = $depositModel->create([
-                'user_id'    => $userId,
-                'plan_id'    => $planId,
-                'amount'     => $amount,
-                'currency'   => $currency,
-                'status'     => 'active',
-                'expires_at' => $expiresAt,
-                'created_at' => date('Y-m-d H:i:s'),
+                'user_id'       => $userId,
+                'plan_id'       => $planId,
+                'amount'        => $amount,
+                'currency'      => $currency,
+                'status'        => 'active',
+                'expires_at'    => $expiresAt,
+                'created_at'    => date('Y-m-d H:i:s'),
+                'usd_amount'    => $snapshot['usd_amount'],
+                'eur_amount'    => $snapshot['eur_amount'],
+                'rate_snapshot' => $snapshot['rate_snapshot'],
             ]);
 
             $transModel = new TransactionModel();
