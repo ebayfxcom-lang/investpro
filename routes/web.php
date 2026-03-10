@@ -145,4 +145,8 @@ $router->get('/admin/spin', [Admin\SpinController::class, 'index']);
 $router->post('/admin/spin', [Admin\SpinController::class, 'index']);
 $router->get('/admin/spin/history', [Admin\SpinController::class, 'history']);
 
+// User Spin
+$router->get('/user/spin', [User\SpinController::class, 'index']);
+$router->post('/user/spin', [User\SpinController::class, 'index']);
+
 return $router;

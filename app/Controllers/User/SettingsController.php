@@ -25,11 +25,16 @@ class SettingsController extends Controller
                 $this->redirect('/user/settings');
             }
             $userModel->update($userId, [
-                'first_name'   => trim($request->post('first_name', '')),
-                'last_name'    => trim($request->post('last_name', '')),
-                'phone'        => trim($request->post('phone', '')),
-                'country'      => trim($request->post('country', '')),
-                'updated_at'   => date('Y-m-d H:i:s'),
+                'first_name'          => trim($request->post('first_name', '')),
+                'last_name'           => trim($request->post('last_name', '')),
+                'phone'               => trim($request->post('phone', '')),
+                'whatsapp_number'     => trim($request->post('whatsapp_number', '')),
+                'facebook_url'        => trim($request->post('facebook_url', '')) ?: null,
+                'country'             => trim($request->post('country', '')),
+                'preferred_currency'  => strtoupper(trim($request->post('preferred_currency', 'USD'))),
+                'payout_details'      => trim($request->post('payout_details', '')) ?: null,
+                'communication_prefs' => trim($request->post('communication_prefs', 'email')),
+                'updated_at'          => date('Y-m-d H:i:s'),
             ]);
             (new AuditLog())->log('profile_updated', 'User updated profile', $userId, $request->ip());
             $this->flash('success', 'Profile updated successfully.');

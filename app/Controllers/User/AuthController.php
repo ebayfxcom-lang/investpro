@@ -59,11 +59,15 @@ class AuthController extends Controller
                 $this->redirect('/register');
             }
 
-            $username = trim($request->post('username', ''));
-            $email    = trim($request->post('email', ''));
-            $password = $request->post('password', '');
-            $confirm  = $request->post('password_confirm', '');
-            $refCode  = trim($request->post('ref', ''));
+            $username           = trim($request->post('username', ''));
+            $email              = trim($request->post('email', ''));
+            $password           = $request->post('password', '');
+            $confirm            = $request->post('password_confirm', '');
+            $refCode            = trim($request->post('ref', ''));
+            $whatsapp           = trim($request->post('whatsapp_number', ''));
+            $facebook           = trim($request->post('facebook_url', ''));
+            $country            = trim($request->post('country', ''));
+            $preferred_currency = strtoupper(trim($request->post('preferred_currency', 'USD')));
 
             $userModel = new UserModel();
 
@@ -73,6 +77,10 @@ class AuthController extends Controller
             }
             if ($password !== $confirm) {
                 $this->flash('error', 'Passwords do not match.');
+                $this->redirect('/register');
+            }
+            if (empty($whatsapp) || !preg_match('/^\+?[\d\s\-\(\)]{7,20}$/', $whatsapp)) {
+                $this->flash('error', 'WhatsApp number is required and must be 7–20 characters (digits, spaces, +, -, (, ) only).');
                 $this->redirect('/register');
             }
             if ($userModel->findByEmail($email)) {
@@ -91,14 +99,18 @@ class AuthController extends Controller
             }
 
             $id = $userModel->create([
-                'username'      => $username,
-                'email'         => $email,
-                'password'      => $userModel->hashPassword($password),
-                'referral_code' => $userModel->generateReferralCode(),
-                'referred_by'   => $referredBy,
-                'role'          => 'user',
-                'status'        => 'active',
-                'created_at'    => date('Y-m-d H:i:s'),
+                'username'           => $username,
+                'email'              => $email,
+                'password'           => $userModel->hashPassword($password),
+                'referral_code'      => $userModel->generateReferralCode(),
+                'referred_by'        => $referredBy,
+                'role'               => 'user',
+                'status'             => 'active',
+                'whatsapp_number'    => $whatsapp,
+                'facebook_url'       => $facebook ?: null,
+                'country'            => $country ?: null,
+                'preferred_currency' => in_array($preferred_currency, ['USD', 'EUR', 'BTC', 'ETH', 'USDT']) ? $preferred_currency : 'USD',
+                'created_at'         => date('Y-m-d H:i:s'),
             ]);
 
             $user = $userModel->find((int)$id);
