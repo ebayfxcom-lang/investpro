@@ -47,6 +47,10 @@ class SpinService
      */
     public function performSpin(int $userId, string $spinType = 'free'): array
     {
+        if (!in_array($spinType, ['free', 'paid'], true)) {
+            return ['success' => false, 'reward' => null, 'error' => 'Invalid spin type.'];
+        }
+
         $settings = $this->settingsModel->getSettings();
         if (!$settings['enabled']) {
             return ['success' => false, 'reward' => null, 'error' => 'Spin rewards are currently disabled.'];
@@ -122,16 +126,21 @@ class SpinService
         $settings = $this->settingsModel->getSettings();
         $totalCost = (float)$settings['spin_price'] * $quantity;
 
-        $balance = $this->walletModel->getBalance($userId, 'USD');
-        if ($balance < $totalCost) {
-            return ['success' => false, 'error' => 'Insufficient USD balance.'];
+        $db = Database::getInstance();
+        $db->beginTransaction();
+        try {
+            if (!$this->walletModel->debit($userId, 'USD', $totalCost)) {
+                $db->rollBack();
+                return ['success' => false, 'error' => 'Insufficient USD balance.'];
+            }
+            $this->userSpinModel->addPaidSpins($userId, $quantity);
+            $db->commit();
+        } catch (\Throwable $e) {
+            $db->rollBack();
+            error_log('SpinService purchaseSpins error: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'An error occurred. Please try again.'];
         }
 
-        if (!$this->walletModel->debit($userId, 'USD', $totalCost)) {
-            return ['success' => false, 'error' => 'Failed to deduct balance.'];
-        }
-
-        $this->userSpinModel->addPaidSpins($userId, $quantity);
         return ['success' => true, 'error' => null];
     }
 }

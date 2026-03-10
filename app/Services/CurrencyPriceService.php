@@ -111,10 +111,10 @@ class CurrencyPriceService
                 $failed[] = $code;
                 continue;
             }
-            // rate_to_usd for crypto means: 1 USD = X crypto, but we store it as 1 crypto = X USD inverse
-            // Convention: rate_to_usd = how many USD one unit of this currency is worth
-            // So rate_to_usd = priceUsd (e.g. 1 BTC = 65000 USD -> rate_to_usd = 65000)
-            $this->currencyModel->updateRate($code, $priceUsd);
+            // Convention: rate_to_usd = units of this currency per 1 USD
+            // e.g. 1 BTC = 65000 USD → rate_to_usd = 1/65000 ≈ 0.0000154
+            $rateToUsd = 1.0 / $priceUsd;
+            $this->currencyModel->updateRate($code, $rateToUsd);
             $this->priceHistoryModel->recordPrice($code, $priceUsd, $priceEur > 0 ? $priceEur : null, 'coingecko');
             $updated[] = $code;
         }
@@ -144,12 +144,13 @@ class CurrencyPriceService
                 $failed[] = $code;
                 continue;
             }
-            // rate_to_usd for fiat: how many USD does 1 unit cost
+            // Convention: rate_to_usd = units of this currency per 1 USD
             // open.er-api gives USD-based rates: $rates['EUR'] = 0.92 means 1 USD = 0.92 EUR
-            // So 1 EUR = 1/0.92 USD => rate_to_usd for EUR = 1/0.92
+            // So rate_to_usd for EUR = 0.92 (EUR per USD) — store directly.
             $rate     = (float)$rates[$code];
-            $rateToUsd = $rate > 0 ? 1.0 / $rate : 1.0;
-            $priceEur  = ($eurRate && $eurRate > 0) ? $rate / $eurRate : null;
+            $rateToUsd = $rate > 0 ? $rate : 1.0;
+            // priceEur: how many units of this currency equal 1 EUR (cross-rate via USD)
+            $priceEur  = ($eurRate && $eurRate > 0 && $rateToUsd > 0) ? $rateToUsd / $eurRate : null;
 
             $this->currencyModel->updateRate($code, $rateToUsd);
             $this->priceHistoryModel->recordPrice($code, $rateToUsd, $priceEur, 'er-api');
