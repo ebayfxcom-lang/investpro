@@ -34,6 +34,11 @@ abstract class Controller
         $smarty->assign('csrf_token', Csrf::getToken());
         $smarty->assign('flash', $this->session->getFlash());
 
+        // Register custom modifiers not built into Smarty 5
+        $smarty->registerPlugin('modifier', 'ucfirst', fn($s) => ucfirst((string)$s));
+        $smarty->registerPlugin('modifier', 'ceil', fn($n) => (int)ceil((float)$n));
+        $smarty->registerPlugin('modifier', 'strtotime', fn($s) => strtotime((string)$s));
+
         return $smarty;
     }
 
