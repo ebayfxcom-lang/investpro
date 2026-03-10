@@ -14,6 +14,7 @@ use App\Services\CurrencyPriceService;
 
 class CurrencyController extends Controller
 {
+    private const MIN_EXCHANGE_RATE = 0.0000001;
     public function index(Request $request): void
     {
         $this->requireAuth('admin');
@@ -62,7 +63,7 @@ class CurrencyController extends Controller
                 $status = $request->post('status', 'active');
                 if ($id > 0) {
                     $currencyModel->update($id, [
-                        'rate_to_usd' => max(0.0000001, $rate),
+                        'rate_to_usd' => max(self::MIN_EXCHANGE_RATE, $rate),
                         'status'      => $status,
                         'updated_at'  => date('Y-m-d H:i:s'),
                     ]);
