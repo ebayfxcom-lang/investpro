@@ -81,9 +81,11 @@ class FaqController extends Controller
                 }
                 try {
                     $slug = $categoryModel->slugify($name);
-                    $existing = $categoryModel->findBySlug($slug);
-                    if ($existing) {
-                        $slug .= '-' . time();
+                    // Ensure unique slug using counter-based approach
+                    $baseSlug = $slug;
+                    $counter  = 2;
+                    while ($categoryModel->findBySlug($slug)) {
+                        $slug = $baseSlug . '-' . $counter++;
                     }
                     $categoryModel->create([
                         'name'       => $name,

@@ -54,10 +54,7 @@ class SpinRewardModel extends Model
         }
 
         if (empty($rewards)) {
-            // Fall back to all active rewards
-            $rewards = $this->getActiveRewards();
-        }
-        if (empty($rewards)) {
+            // No mode-specific rewards configured – signal caller to handle this case
             return null;
         }
 

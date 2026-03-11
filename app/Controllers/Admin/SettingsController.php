@@ -40,7 +40,7 @@ class SettingsController extends Controller
                 $this->flash('success', 'Settings saved.');
             } catch (\Throwable $e) {
                 error_log('SettingsController save error: ' . $e->getMessage());
-                $this->flash('error', 'Could not save settings: ' . $e->getMessage());
+                $this->flash('error', 'Could not save settings. Please check the server log for details.');
             }
             $this->redirect('/admin/settings');
         }
@@ -93,7 +93,7 @@ class SettingsController extends Controller
                 $this->flash('success', 'Referral settings saved.');
             } catch (\Throwable $e) {
                 error_log('SettingsController referral save error: ' . $e->getMessage());
-                $this->flash('error', 'Could not save referral settings: ' . $e->getMessage());
+                $this->flash('error', 'Could not save referral settings. Please check the server log for details.');
             }
             $this->redirect('/admin/settings/referral');
         }

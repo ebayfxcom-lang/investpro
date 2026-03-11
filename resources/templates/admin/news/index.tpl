@@ -16,6 +16,7 @@
           <tr>
             <th>#</th>
             <th>Title</th>
+            <th>Publisher</th>
             <th>Status</th>
             <th>Published At</th>
             <th>Created</th>
