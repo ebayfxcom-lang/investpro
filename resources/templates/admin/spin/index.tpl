@@ -114,6 +114,7 @@
                 <th>Slot</th>
                 <th>Label</th>
                 <th>Type</th>
+                <th>Applies To</th>
                 <th>Value</th>
                 <th>Probability</th>
                 <th>Color</th>
@@ -130,6 +131,11 @@
                   <td>
                     <span class="badge bg-secondary bg-opacity-25 text-dark">
                       {$reward.reward_type|replace:'_':' '|ucfirst}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge {if $reward.spin_mode == 'free'}bg-success bg-opacity-25 text-success{elseif $reward.spin_mode == 'paid'}bg-info bg-opacity-25 text-info{else}bg-primary bg-opacity-25 text-primary{/if}">
+                      {$reward.spin_mode|default:'both'|ucfirst}
                     </span>
                   </td>
                   <td class="font-monospace">
@@ -167,6 +173,7 @@
                             data-slot="{$reward.slot}"
                             data-label="{$reward.label|escape:'html'}"
                             data-type="{$reward.reward_type}"
+                            data-mode="{$reward.spin_mode|default:'both'}"
                             data-value="{$reward.reward_value}"
                             data-probability="{$reward.probability}"
                             data-color="{$reward.color|escape:'html'}"
@@ -246,10 +253,10 @@
 <div class="modal fade" id="editRewardModal" tabindex="-1" aria-labelledby="editRewardModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" action="/admin/spin/reward">
+      <form method="POST" action="/admin/spin">
         <input type="hidden" name="_csrf_token" value="{$csrf_token}">
         <input type="hidden" name="action" value="update_reward">
-        <input type="hidden" name="id" id="editRewardId">
+        <input type="hidden" name="reward_id" id="editRewardId">
         <div class="modal-header">
           <h5 class="modal-title fw-bold" id="editRewardModalLabel">
             <i class="fas fa-edit me-2 text-primary"></i>Edit Reward Slot #<span id="editSlotNumber"></span>
@@ -262,18 +269,29 @@
             <input type="text" class="form-control" id="editLabel" name="label" required maxlength="100">
           </div>
           <div class="mb-3">
+            <label for="editSpinMode" class="form-label fw-semibold">Applies To</label>
+            <select class="form-select" id="editSpinMode" name="spin_mode">
+              <option value="both">Both (Free &amp; Paid)</option>
+              <option value="free">Free Spins Only</option>
+              <option value="paid">Paid Spins Only</option>
+            </select>
+            <div class="form-text">Configure which type of spin can land on this reward.</div>
+          </div>
+          <div class="mb-3">
             <label for="editRewardType" class="form-label fw-semibold">Reward Type</label>
             <select class="form-select" id="editRewardType" name="reward_type" required>
-              <option value="cash">Cash</option>
-              <option value="extra_spin">Extra Spin</option>
+              <option value="usd">USD Cash</option>
+              <option value="points">Points</option>
+              <option value="spin_credits">Spin Credits</option>
+              <option value="percent_bonus">% Bonus</option>
               <option value="bonus">Bonus</option>
-              <option value="none">No Reward</option>
+              <option value="no_reward">No Reward</option>
             </select>
           </div>
           <div class="mb-3">
             <label for="editRewardValue" class="form-label fw-semibold">Reward Value</label>
             <input type="text" class="form-control" id="editRewardValue" name="reward_value" required>
-            <div class="form-text">For cash: enter amount in USD. For extra spin: enter number of spins.</div>
+            <div class="form-text">For cash: enter amount in USD. For spin credits: number of spins.</div>
           </div>
           <div class="mb-3">
             <label for="editProbability" class="form-label fw-semibold">Probability (%)</label>
@@ -314,15 +332,16 @@
   const modal = document.getElementById('editRewardModal');
   modal.addEventListener('show.bs.modal', function (event) {
     const btn = event.relatedTarget;
-    document.getElementById('editRewardId').value        = btn.dataset.id;
-    document.getElementById('editSlotNumber').textContent = btn.dataset.slot;
-    document.getElementById('editLabel').value           = btn.dataset.label;
-    document.getElementById('editRewardType').value      = btn.dataset.type;
-    document.getElementById('editRewardValue').value     = btn.dataset.value;
-    document.getElementById('editProbability').value     = btn.dataset.probability;
-    document.getElementById('editColor').value           = btn.dataset.color;
-    document.getElementById('editColorPicker').value     = btn.dataset.color;
-    document.getElementById('editStatus').value          = btn.dataset.status;
+    document.getElementById('editRewardId').value         = btn.dataset.id;
+    document.getElementById('editSlotNumber').textContent  = btn.dataset.slot;
+    document.getElementById('editLabel').value            = btn.dataset.label;
+    document.getElementById('editSpinMode').value         = btn.dataset.mode || 'both';
+    document.getElementById('editRewardType').value       = btn.dataset.type;
+    document.getElementById('editRewardValue').value      = btn.dataset.value;
+    document.getElementById('editProbability').value      = btn.dataset.probability;
+    document.getElementById('editColor').value            = btn.dataset.color;
+    document.getElementById('editColorPicker').value      = btn.dataset.color;
+    document.getElementById('editStatus').value           = btn.dataset.status;
   });
 
   const colorPicker = document.getElementById('editColorPicker');

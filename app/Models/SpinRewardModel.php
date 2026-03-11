@@ -14,14 +14,49 @@ class SpinRewardModel extends Model
         return $this->findAll('status = ?', ['active'], 'slot ASC');
     }
 
+    public function getActiveRewardsByMode(string $mode): array
+    {
+        // Returns rewards for a specific mode: 'free', 'paid', or 'both'
+        // A reward with mode='both' applies to both free and paid spins
+        return $this->db->fetchAll(
+            "SELECT * FROM spin_rewards WHERE status = 'active' AND (spin_mode = ? OR spin_mode = 'both') ORDER BY slot ASC",
+            [$mode]
+        );
+    }
+
     public function getAllRewards(): array
     {
         return $this->findAll('', [], 'slot ASC');
     }
 
-    public function spin(): ?array
+    public function getFreeRewards(): array
     {
-        $rewards = $this->getActiveRewards();
+        return $this->db->fetchAll(
+            "SELECT * FROM spin_rewards WHERE status = 'active' AND (spin_mode = 'free' OR spin_mode = 'both') ORDER BY slot ASC"
+        );
+    }
+
+    public function getPaidRewards(): array
+    {
+        return $this->db->fetchAll(
+            "SELECT * FROM spin_rewards WHERE status = 'active' AND (spin_mode = 'paid' OR spin_mode = 'both') ORDER BY slot ASC"
+        );
+    }
+
+    public function spin(?string $spinMode = null): ?array
+    {
+        if ($spinMode === 'free') {
+            $rewards = $this->getFreeRewards();
+        } elseif ($spinMode === 'paid') {
+            $rewards = $this->getPaidRewards();
+        } else {
+            $rewards = $this->getActiveRewards();
+        }
+
+        if (empty($rewards)) {
+            // Fall back to all active rewards
+            $rewards = $this->getActiveRewards();
+        }
         if (empty($rewards)) {
             return null;
         }

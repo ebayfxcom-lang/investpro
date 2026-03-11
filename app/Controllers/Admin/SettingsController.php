@@ -34,9 +34,14 @@ class SettingsController extends Controller
                     $data[$key] = $val;
                 }
             }
-            $settingsModel->setMany($data);
-            (new AuditLog())->log('settings_updated', 'Site settings updated', Auth::id('admin'), $request->ip());
-            $this->flash('success', 'Settings saved.');
+            try {
+                $settingsModel->setMany($data);
+                (new AuditLog())->log('settings_updated', 'Site settings updated', Auth::id('admin'), $request->ip());
+                $this->flash('success', 'Settings saved.');
+            } catch (\Throwable $e) {
+                error_log('SettingsController save error: ' . $e->getMessage());
+                $this->flash('error', 'Could not save settings: ' . $e->getMessage());
+            }
             $this->redirect('/admin/settings');
         }
 
@@ -58,33 +63,38 @@ class SettingsController extends Controller
                 $this->flash('error', 'Invalid CSRF token.');
                 $this->redirect('/admin/settings/referral');
             }
-            $settingsModel->setMany([
-                'referral_percent'    => (float)$request->post('referral_percent', 5),
-                'referral_levels'     => (int)$request->post('referral_levels', 1),
-                'referral_level2'     => (float)$request->post('referral_level2', 0),
-                'referral_level3'     => (float)$request->post('referral_level3', 0),
-                'referral_on_deposit' => (int)$request->post('referral_on_deposit', 1),
-                // Threshold mode: 'flat' = fixed rate, 'count' = based on downline count, 'deposit' = based on deposit volume
-                'referral_threshold_mode'    => $request->post('referral_threshold_mode', 'flat'),
-                'referral_min_downlines'     => (int)$request->post('referral_min_downlines', 0),
-                'referral_min_deposit'       => (float)$request->post('referral_min_deposit', 0),
-                // Level 1 threshold tiers (count-based)
-                'referral_l1_threshold1_count' => (int)$request->post('referral_l1_threshold1_count', 0),
-                'referral_l1_threshold1_rate'  => (float)$request->post('referral_l1_threshold1_rate', 5),
-                'referral_l1_threshold2_count' => (int)$request->post('referral_l1_threshold2_count', 10),
-                'referral_l1_threshold2_rate'  => (float)$request->post('referral_l1_threshold2_rate', 7),
-                'referral_l1_threshold3_count' => (int)$request->post('referral_l1_threshold3_count', 25),
-                'referral_l1_threshold3_rate'  => (float)$request->post('referral_l1_threshold3_rate', 10),
-                // Level 2 threshold tiers
-                'referral_l2_threshold1_rate'  => (float)$request->post('referral_l2_threshold1_rate', 2),
-                'referral_l2_threshold2_rate'  => (float)$request->post('referral_l2_threshold2_rate', 3),
-                'referral_l2_threshold3_rate'  => (float)$request->post('referral_l2_threshold3_rate', 5),
-                // Level 3 threshold tiers
-                'referral_l3_threshold1_rate'  => (float)$request->post('referral_l3_threshold1_rate', 1),
-                'referral_l3_threshold2_rate'  => (float)$request->post('referral_l3_threshold2_rate', 1.5),
-                'referral_l3_threshold3_rate'  => (float)$request->post('referral_l3_threshold3_rate', 2),
-            ]);
-            $this->flash('success', 'Referral settings saved.');
+            try {
+                $settingsModel->setMany([
+                    'referral_percent'    => (float)$request->post('referral_percent', 5),
+                    'referral_levels'     => (int)$request->post('referral_levels', 1),
+                    'referral_level2'     => (float)$request->post('referral_level2', 0),
+                    'referral_level3'     => (float)$request->post('referral_level3', 0),
+                    'referral_on_deposit' => (int)$request->post('referral_on_deposit', 1),
+                    // Threshold mode: 'flat' = fixed rate, 'count' = based on downline count, 'deposit' = based on deposit volume
+                    'referral_threshold_mode'    => $request->post('referral_threshold_mode', 'flat'),
+                    'referral_min_downlines'     => (int)$request->post('referral_min_downlines', 0),
+                    'referral_min_deposit'       => (float)$request->post('referral_min_deposit', 0),
+                    // Level 1 threshold tiers (count-based)
+                    'referral_l1_threshold1_count' => (int)$request->post('referral_l1_threshold1_count', 0),
+                    'referral_l1_threshold1_rate'  => (float)$request->post('referral_l1_threshold1_rate', 5),
+                    'referral_l1_threshold2_count' => (int)$request->post('referral_l1_threshold2_count', 10),
+                    'referral_l1_threshold2_rate'  => (float)$request->post('referral_l1_threshold2_rate', 7),
+                    'referral_l1_threshold3_count' => (int)$request->post('referral_l1_threshold3_count', 25),
+                    'referral_l1_threshold3_rate'  => (float)$request->post('referral_l1_threshold3_rate', 10),
+                    // Level 2 threshold tiers
+                    'referral_l2_threshold1_rate'  => (float)$request->post('referral_l2_threshold1_rate', 2),
+                    'referral_l2_threshold2_rate'  => (float)$request->post('referral_l2_threshold2_rate', 3),
+                    'referral_l2_threshold3_rate'  => (float)$request->post('referral_l2_threshold3_rate', 5),
+                    // Level 3 threshold tiers
+                    'referral_l3_threshold1_rate'  => (float)$request->post('referral_l3_threshold1_rate', 1),
+                    'referral_l3_threshold2_rate'  => (float)$request->post('referral_l3_threshold2_rate', 1.5),
+                    'referral_l3_threshold3_rate'  => (float)$request->post('referral_l3_threshold3_rate', 2),
+                ]);
+                $this->flash('success', 'Referral settings saved.');
+            } catch (\Throwable $e) {
+                error_log('SettingsController referral save error: ' . $e->getMessage());
+                $this->flash('error', 'Could not save referral settings: ' . $e->getMessage());
+            }
             $this->redirect('/admin/settings/referral');
         }
 

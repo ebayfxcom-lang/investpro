@@ -74,7 +74,7 @@ class SpinService
             }
 
             // Spin the wheel
-            $reward = $this->rewardModel->spin();
+            $reward = $this->rewardModel->spin($spinType);
             if (!$reward) {
                 $db->rollBack();
                 return ['success' => false, 'reward' => null, 'error' => 'No rewards configured.'];

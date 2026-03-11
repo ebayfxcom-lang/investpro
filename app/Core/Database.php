@@ -62,7 +62,7 @@ class Database
 
     public function insert(string $table, array $data): string
     {
-        $columns = implode(', ', array_keys($data));
+        $columns = implode(', ', array_map(fn($k) => "`{$k}`", array_keys($data)));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
         $sql = "INSERT INTO `{$table}` ({$columns}) VALUES ({$placeholders})";
         $this->query($sql, array_values($data));

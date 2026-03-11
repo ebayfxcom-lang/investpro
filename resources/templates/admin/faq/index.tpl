@@ -3,9 +3,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h6 class="fw-bold mb-0"><i class="fas fa-question-circle me-2 text-info"></i>FAQ Manager</h6>
-  <button class="btn btn-accent btn-sm" data-bs-toggle="modal" data-bs-target="#createFaqModal">
-    <i class="fas fa-plus me-1"></i>Add FAQ
-  </button>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#manageCatsModal">
+      <i class="fas fa-tags me-1"></i>Manage Categories
+    </button>
+    <button class="btn btn-accent btn-sm" data-bs-toggle="modal" data-bs-target="#createFaqModal">
+      <i class="fas fa-plus me-1"></i>Add FAQ
+    </button>
+  </div>
 </div>
 
 <div class="card">
@@ -63,6 +68,72 @@
   </div>
 </div>
 
+{* Manage Categories Modal *}
+<div class="modal fade" id="manageCatsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold"><i class="fas fa-tags me-2"></i>Manage FAQ Categories</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        {* Existing categories *}
+        <h6 class="fw-semibold mb-3">Current Categories</h6>
+        {if $categories}
+        <div class="list-group mb-4">
+          {foreach $categories as $cat}
+          {if $cat.id}
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+            <div>
+              <span class="fw-semibold">{$cat.name|escape}</span>
+              <span class="text-muted small ms-2">/{$cat.slug|escape}</span>
+              {if $cat.status == 'inactive'}<span class="badge bg-secondary ms-2">Inactive</span>{/if}
+            </div>
+            <div class="d-flex gap-1">
+              <form method="POST" action="/admin/faq" class="d-inline">
+                <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+                <input type="hidden" name="action" value="toggle_category">
+                <input type="hidden" name="category_id" value="{$cat.id}">
+                <button type="submit" class="btn btn-xs btn-outline-{if $cat.status == 'active'}warning{else}success{/if} py-0 px-2 btn-sm">
+                  {if $cat.status == 'active'}Disable{else}Enable{/if}
+                </button>
+              </form>
+              <form method="POST" action="/admin/faq" class="d-inline">
+                <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+                <input type="hidden" name="action" value="delete_category">
+                <input type="hidden" name="category_id" value="{$cat.id}">
+                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2 btn-sm"
+                        onclick="return confirm('Delete this category?')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {else}
+          <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+            <span class="text-muted">{$cat.name|escape} <small>(built-in)</small></span>
+          </div>
+          {/if}
+          {/foreach}
+        </div>
+        {/if}
+
+        {* Add new category *}
+        <h6 class="fw-semibold mb-3">Add New Category</h6>
+        <form method="POST" action="/admin/faq">
+          <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+          <input type="hidden" name="action" value="create_category">
+          <div class="input-group">
+            <input type="text" name="cat_name" class="form-control" placeholder="Category name..." required>
+            <input type="number" name="cat_sort_order" class="form-control" placeholder="Order" value="0" style="max-width:80px">
+            <button type="submit" class="btn btn-accent"><i class="fas fa-plus"></i></button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 {* Create FAQ Modal *}
 <div class="modal fade" id="createFaqModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -88,7 +159,9 @@
               <label class="form-label fw-semibold">Category</label>
               <select name="category" class="form-select">
                 {foreach $categories as $cat}
-                <option value="{$cat}">{$cat|ucfirst}</option>
+                <option value="{if $cat.slug}{$cat.slug}{else}{$cat}{/if}">
+                  {if $cat.name}{$cat.name|escape}{else}{$cat|ucfirst}{/if}
+                </option>
                 {/foreach}
               </select>
             </div>
@@ -140,7 +213,9 @@
               <label class="form-label fw-semibold">Category</label>
               <select name="category" id="editFaqCategory" class="form-select">
                 {foreach $categories as $cat}
-                <option value="{$cat}">{$cat|ucfirst}</option>
+                <option value="{if $cat.slug}{$cat.slug}{else}{$cat}{/if}">
+                  {if $cat.name}{$cat.name|escape}{else}{$cat|ucfirst}{/if}
+                </option>
                 {/foreach}
               </select>
             </div>
@@ -180,4 +255,3 @@
 }());
 </script>
 {/block}
-

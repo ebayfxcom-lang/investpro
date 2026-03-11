@@ -27,15 +27,22 @@ class NewsletterController extends Controller
             $action = $request->post('action', '');
 
             if ($action === 'create') {
+                $subject    = trim($request->post('subject', ''));
+                $senderName = trim($request->post('sender_name', ''));
+                if ($subject === '') {
+                    $this->flash('error', 'Subject is required.');
+                    $this->redirect('/admin/newsletter');
+                }
                 $newsletterModel->create([
-                    'subject'    => trim($request->post('subject', '')),
-                    'content'    => $request->post('content', ''),
-                    'recipients' => $request->post('recipients', 'all'),
-                    'status'     => 'draft',
-                    'created_by' => Auth::id('admin'),
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'subject'     => $subject,
+                    'content'     => $request->post('content', ''),
+                    'sender_name' => $senderName ?: null,
+                    'recipients'  => $request->post('recipients', 'all'),
+                    'status'      => 'draft',
+                    'created_by'  => Auth::id('admin'),
+                    'created_at'  => date('Y-m-d H:i:s'),
                 ]);
-                (new AuditLog())->log('newsletter_created', 'Newsletter draft created: ' . $request->post('subject'), Auth::id('admin'), $request->ip());
+                (new AuditLog())->log('newsletter_created', 'Newsletter draft created: ' . $subject, Auth::id('admin'), $request->ip());
                 $this->flash('success', 'Newsletter draft saved.');
             }
 
@@ -63,10 +70,11 @@ class NewsletterController extends Controller
                     } else {
                         $count = $userModel->count();
                     }
+                    $adminUser  = Auth::user('admin');
+                    $senderName = $adminUser ? ($adminUser['username'] ?? '') : '';
                     // TODO: Integrate with EmailService to actually send emails to recipients.
-                    // Example: (new EmailService())->sendNewsletter($nl, $recipientList);
-                    $newsletterModel->markSent($id, $count);
-                    (new AuditLog())->log('newsletter_sent', "Newsletter #{$id} sent to {$count} recipients", Auth::id('admin'), $request->ip());
+                    $newsletterModel->markSent($id, $count, Auth::id('admin'), $senderName);
+                    (new AuditLog())->log('newsletter_sent', "Newsletter #{$id} sent to {$count} recipients by {$senderName}", Auth::id('admin'), $request->ip());
                     $this->flash('success', "Newsletter sent to {$count} recipients.");
                 } else {
                     $this->flash('error', 'Newsletter not found or already sent.');

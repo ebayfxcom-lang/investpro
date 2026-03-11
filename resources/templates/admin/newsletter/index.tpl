@@ -53,6 +53,7 @@
           <tr>
             <th>#</th>
             <th>Subject</th>
+            <th>Sender</th>
             <th>Recipients</th>
             <th>Status</th>
             <th>Sent Count</th>
@@ -66,6 +67,7 @@
             <tr>
               <td class="text-muted small">{$nl.id}</td>
               <td class="fw-semibold">{$nl.subject|escape|truncate:50:'...'}</td>
+              <td class="text-muted small">{$nl.sender_name|default:'-'|escape}</td>
               <td><span class="badge bg-info bg-opacity-25 text-info">{$nl.recipients|ucfirst}</span></td>
               <td>
                 <span class="badge {if $nl.status == 'sent'}bg-success bg-opacity-25 text-success{else}bg-warning bg-opacity-25 text-warning{/if}">
@@ -141,6 +143,11 @@
           <div class="mb-3">
             <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
             <input type="text" name="subject" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Sender Name</label>
+            <input type="text" name="sender_name" class="form-control" placeholder="e.g. Support Team">
+            <div class="form-text">Optional. Displayed in the newsletter list as who sent this.</div>
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Content <span class="text-danger">*</span></label>

@@ -25,14 +25,24 @@ class NewsController extends Controller
             $action = $request->post('action', '');
 
             if ($action === 'create') {
+                $title = trim($request->post('title', ''));
+                if ($title === '') {
+                    $this->flash('error', 'Title is required.');
+                    $this->redirect('/admin/news');
+                }
+                $adminUser     = Auth::user('admin');
+                $publisherName = trim($request->post('publisher_name', '')) ?: ($adminUser['username'] ?? '');
+                $hashtags      = trim($request->post('hashtags', ''));
                 $newsModel->create([
-                    'title'      => trim($request->post('title', '')),
-                    'content'    => trim($request->post('content', '')),
-                    'status'     => $request->post('status', 'draft'),
-                    'published_at' => $request->post('status') === 'published' ? date('Y-m-d H:i:s') : null,
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'title'          => $title,
+                    'content'        => trim($request->post('content', '')),
+                    'publisher_name' => $publisherName ?: null,
+                    'hashtags'       => $hashtags ?: null,
+                    'status'         => $request->post('status', 'draft'),
+                    'published_at'   => $request->post('status') === 'published' ? date('Y-m-d H:i:s') : null,
+                    'created_at'     => date('Y-m-d H:i:s'),
                 ]);
-                (new AuditLog())->log('news_created', 'News post created: ' . $request->post('title'), Auth::id('admin'), $request->ip());
+                (new AuditLog())->log('news_created', 'News post created: ' . $title, Auth::id('admin'), $request->ip());
                 $this->flash('success', 'News post created.');
             }
 
@@ -40,10 +50,12 @@ class NewsController extends Controller
                 $id = (int)$request->post('news_id', 0);
                 if ($id > 0) {
                     $updates = [
-                        'title'      => trim($request->post('title', '')),
-                        'content'    => trim($request->post('content', '')),
-                        'status'     => $request->post('status', 'draft'),
-                        'updated_at' => date('Y-m-d H:i:s'),
+                        'title'          => trim($request->post('title', '')),
+                        'content'        => trim($request->post('content', '')),
+                        'publisher_name' => trim($request->post('publisher_name', '')) ?: null,
+                        'hashtags'       => trim($request->post('hashtags', '')) ?: null,
+                        'status'         => $request->post('status', 'draft'),
+                        'updated_at'     => date('Y-m-d H:i:s'),
                     ];
                     if ($request->post('status') === 'published') {
                         $existing = $newsModel->find($id);
