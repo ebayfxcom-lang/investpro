@@ -49,6 +49,13 @@ class EmailService
         }
     }
 
+    /**
+     * Send an email using a template slug.
+     *
+     * $vars may include: username, full_name, balance, active_balance,
+     * total_deposits, total_withdrawals, total_earnings, referral_earnings,
+     * whatsapp, email, date, site_name — and any custom template placeholders.
+     */
     public function sendTemplate(string $slug, string $to, array $vars = [], string $toName = ''): bool
     {
         $templateModel = new EmailTemplateModel();
@@ -57,5 +64,24 @@ class EmailService
             return false;
         }
         return $this->send($to, $rendered['subject'], $rendered['body'], $toName);
+    }
+
+    /**
+     * Build common user vars for email templates.
+     */
+    public static function buildUserVars(array $user, array $stats = []): array
+    {
+        return array_merge([
+            'username'          => $user['username']       ?? '',
+            'full_name'         => trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')),
+            'email'             => $user['email']           ?? '',
+            'whatsapp'          => $user['whatsapp_number'] ?? '',
+            'balance'           => $stats['balance']           ?? '0.00',
+            'active_balance'    => $stats['active_balance']    ?? '0.00',
+            'total_deposits'    => $stats['total_deposits']    ?? '0.00',
+            'total_withdrawals' => $stats['total_withdrawals'] ?? '0.00',
+            'total_earnings'    => $stats['total_earnings']    ?? '0.00',
+            'referral_earnings' => $stats['referral_earnings'] ?? '0.00',
+        ], $stats);
     }
 }

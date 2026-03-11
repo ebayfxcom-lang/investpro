@@ -131,4 +131,22 @@ $router->post('/admin/ip-checks/{id}/unblock', [Admin\IpChecksController::class,
 $router->get('/admin/profile', [Admin\ProfileController::class, 'index']);
 $router->post('/admin/profile', [Admin\ProfileController::class, 'index']);
 
+// Currencies
+$router->get('/admin/currencies', [Admin\CurrencyController::class, 'index']);
+$router->post('/admin/currencies', [Admin\CurrencyController::class, 'index']);
+$router->get('/admin/currencies/price-history', [Admin\CurrencyController::class, 'priceHistory']);
+
+// Exchange Rates
+$router->get('/admin/exchange-rates', [Admin\ExchangeRatesController::class, 'index']);
+$router->post('/admin/exchange-rates', [Admin\ExchangeRatesController::class, 'index']);
+
+// Spin Rewards
+$router->get('/admin/spin', [Admin\SpinController::class, 'index']);
+$router->post('/admin/spin', [Admin\SpinController::class, 'index']);
+$router->get('/admin/spin/history', [Admin\SpinController::class, 'history']);
+
+// User Spin
+$router->get('/user/spin', [User\SpinController::class, 'index']);
+$router->post('/user/spin', [User\SpinController::class, 'index']);
+
 return $router;
