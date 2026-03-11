@@ -99,9 +99,36 @@ class SettingsController extends Controller
     {
         $this->requireAuth('admin');
         $currencyModel = new \App\Models\CurrencyModel();
+
+        if ($request->isPost()) {
+            if (!Csrf::validateRequest($request)) {
+                $this->flash('error', 'Invalid CSRF token.');
+                $this->redirect('/admin/settings/currencies');
+            }
+            $action = $request->post('action', '');
+            $code   = strtoupper(trim($request->post('code', '')));
+
+            if ($action === 'toggle' && $code) {
+                $existing = $currencyModel->findByCode($code);
+                if ($existing && $existing['type'] === 'fiat') {
+                    $newStatus = $existing['status'] === 'active' ? 'inactive' : 'active';
+                    $currencyModel->update((int)$existing['id'], [
+                        'status'     => $newStatus,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    (new AuditLog())->log('fiat_currency_toggled', "Fiat {$code} → {$newStatus}", Auth::id('admin'), $request->ip());
+                    $this->flash('success', "Fiat currency {$code} is now {$newStatus}.");
+                }
+            }
+            $this->redirect('/admin/settings/currencies');
+        }
+
+        // Show only fiat currencies on this page
+        $fiats = $currencyModel->findAll("type = 'fiat'", [], 'sort_order ASC, code ASC');
+
         $this->view('admin/settings/currencies', [
-            'title'      => 'Currencies',
-            'currencies' => $currencyModel->findAll('', [], 'sort_order ASC, code ASC'),
+            'title'      => 'Fiat Currencies',
+            'currencies' => $fiats,
             'admin'      => Auth::user('admin'),
         ]);
     }

@@ -42,7 +42,7 @@ class PlansController extends Controller
                 'roi_period'    => $request->post('roi_period', 'daily'),
                 'duration_value' => max(1, (int)$request->post('duration_value', 30)),
                 'duration_unit' => $request->post('duration_unit', 'day'),
-                'duration_days' => (int)$request->post('duration_value', 30), // legacy compat
+                'duration_days' => $this->toDays((int)$request->post('duration_value', 30), $request->post('duration_unit', 'day')),
                 'principal_return' => (int)$request->post('principal_return', 1),
                 'currency'      => strtoupper($request->post('currency', 'USD')),
                 'status'        => $request->post('status', 'active'),
@@ -83,7 +83,7 @@ class PlansController extends Controller
                 'roi_period'    => $request->post('roi_period', 'daily'),
                 'duration_value' => max(1, (int)$request->post('duration_value', 30)),
                 'duration_unit' => $request->post('duration_unit', 'day'),
-                'duration_days' => (int)$request->post('duration_value', 30), // legacy compat
+                'duration_days' => $this->toDays((int)$request->post('duration_value', 30), $request->post('duration_unit', 'day')),
                 'principal_return' => (int)$request->post('principal_return', 1),
                 'currency'      => strtoupper($request->post('currency', 'USD')),
                 'status'        => $request->post('status', 'active'),
@@ -111,5 +111,21 @@ class PlansController extends Controller
         $planModel->delete((int)$params['id']);
         $this->flash('success', 'Plan deleted.');
         $this->redirect('/admin/plans');
+    }
+
+    /**
+     * Convert duration_value + duration_unit to approximate days for legacy compatibility.
+     * Used to keep duration_days column consistent with the actual plan duration.
+     */
+    private function toDays(int $value, string $unit): int
+    {
+        return match ($unit) {
+            'hour'  => (int)ceil($value / 24),
+            'day'   => $value,
+            'week'  => $value * 7,
+            'month' => $value * 30,
+            'year'  => $value * 365,
+            default => $value,
+        };
     }
 }

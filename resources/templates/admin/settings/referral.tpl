@@ -129,24 +129,32 @@
 
           {* Level 2 Thresholds *}
           <h6 class="fw-semibold text-success mb-2">Level 2 Tiers</h6>
+          <p class="text-muted small mb-2">Level 2 uses the same threshold breakpoints as Level 1. Rates below apply to Level 2 downlines.</p>
           <div class="table-responsive mb-4">
             <table class="table table-bordered align-middle mb-0">
               <thead class="table-light">
-                <tr><th>Tier</th><th>Commission (%)</th></tr>
+                <tr>
+                  <th>Tier</th>
+                  <th><span id="thresholdLabel2">Same as Level 1</span></th>
+                  <th>Commission (%)</th>
+                </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>Tier 1 (base)</td>
+                  <td class="text-muted small">Same as L1 Tier 1 threshold</td>
                   <td><input type="number" name="referral_l2_threshold1_rate" class="form-control form-control-sm"
                              value="{$settings.referral_l2_threshold1_rate|default:2}" step="0.01" min="0"></td>
                 </tr>
                 <tr>
                   <td>Tier 2</td>
+                  <td class="text-muted small">Same as L1 Tier 2 threshold</td>
                   <td><input type="number" name="referral_l2_threshold2_rate" class="form-control form-control-sm"
                              value="{$settings.referral_l2_threshold2_rate|default:3}" step="0.01" min="0"></td>
                 </tr>
                 <tr>
                   <td>Tier 3</td>
+                  <td class="text-muted small">Same as L1 Tier 3 threshold</td>
                   <td><input type="number" name="referral_l2_threshold3_rate" class="form-control form-control-sm"
                              value="{$settings.referral_l2_threshold3_rate|default:5}" step="0.01" min="0"></td>
                 </tr>
@@ -156,24 +164,32 @@
 
           {* Level 3 Thresholds *}
           <h6 class="fw-semibold text-warning mb-2">Level 3 Tiers</h6>
+          <p class="text-muted small mb-2">Level 3 uses the same threshold breakpoints as Level 1.</p>
           <div class="table-responsive">
             <table class="table table-bordered align-middle mb-0">
               <thead class="table-light">
-                <tr><th>Tier</th><th>Commission (%)</th></tr>
+                <tr>
+                  <th>Tier</th>
+                  <th><span id="thresholdLabel3">Same as Level 1</span></th>
+                  <th>Commission (%)</th>
+                </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>Tier 1 (base)</td>
+                  <td class="text-muted small">Same as L1 Tier 1 threshold</td>
                   <td><input type="number" name="referral_l3_threshold1_rate" class="form-control form-control-sm"
                              value="{$settings.referral_l3_threshold1_rate|default:1}" step="0.01" min="0"></td>
                 </tr>
                 <tr>
                   <td>Tier 2</td>
+                  <td class="text-muted small">Same as L1 Tier 2 threshold</td>
                   <td><input type="number" name="referral_l3_threshold2_rate" class="form-control form-control-sm"
                              value="{$settings.referral_l3_threshold2_rate|default:1.5}" step="0.01" min="0"></td>
                 </tr>
                 <tr>
                   <td>Tier 3</td>
+                  <td class="text-muted small">Same as L1 Tier 3 threshold</td>
                   <td><input type="number" name="referral_l3_threshold3_rate" class="form-control form-control-sm"
                              value="{$settings.referral_l3_threshold3_rate|default:2}" step="0.01" min="0"></td>
                 </tr>

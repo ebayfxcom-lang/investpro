@@ -33,7 +33,7 @@
             <td>${$p.min_amount|string_format:"%.2f"} - {if $p.max_amount > 0}${$p.max_amount|string_format:"%.2f"}{else}<span class="text-muted">No limit</span>{/if}</td>
             <td><strong class="text-success">{$p.roi_percent}%</strong></td>
             <td class="text-capitalize">{$p.roi_period}</td>
-            <td>{$p.duration_days} days</td>
+            <td>{if $p.duration_value && $p.duration_unit}{$p.duration_value} {if $p.duration_value == 1}{$p.duration_unit}{else}{$p.duration_unit}s{/if}{else}{$p.duration_days} days{/if}</td>
             <td>{if $p.principal_return}<span class="text-success"><i class="fas fa-check"></i> Yes</span>{else}<span class="text-muted">No</span>{/if}</td>
             <td><span class="badge badge-status-{$p.status}">{$p.status|ucfirst}</span></td>
             <td>

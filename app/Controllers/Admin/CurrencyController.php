@@ -119,12 +119,14 @@ class CurrencyController extends Controller
 
         $currencies   = $currencyModel->findAll('', [], 'sort_order ASC, code ASC');
         $priceHistory = (new CurrencyPriceHistoryModel())->getAllLatestPrices();
+        $currencyStats = $currencyModel->getStats();
 
         $this->view('admin/currencies/index', [
-            'title'         => 'Currency Management',
-            'currencies'    => $currencies,
-            'price_history' => $priceHistory,
-            'admin'         => Auth::user('admin'),
+            'title'          => 'Currency Management',
+            'currencies'     => $currencies,
+            'price_history'  => $priceHistory,
+            'currency_stats' => $currencyStats,
+            'admin'          => Auth::user('admin'),
         ]);
     }
 

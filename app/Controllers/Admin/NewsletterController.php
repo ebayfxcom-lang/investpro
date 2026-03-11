@@ -63,6 +63,8 @@ class NewsletterController extends Controller
                     } else {
                         $count = $userModel->count();
                     }
+                    // TODO: Integrate with EmailService to actually send emails to recipients.
+                    // Example: (new EmailService())->sendNewsletter($nl, $recipientList);
                     $newsletterModel->markSent($id, $count);
                     (new AuditLog())->log('newsletter_sent', "Newsletter #{$id} sent to {$count} recipients", Auth::id('admin'), $request->ip());
                     $this->flash('success', "Newsletter sent to {$count} recipients.");

@@ -13,11 +13,13 @@ ALTER TABLE `plans`
     ENUM('hour','day','week','month','year') NOT NULL DEFAULT 'day'
     COMMENT 'Unit for duration_value' AFTER `duration_value`;
 
--- Back-fill from legacy duration_days (value=days, unit=day)
+-- Back-fill from legacy duration_days: copy all existing plans to the new columns.
+-- Plans that already have duration_value=30 and duration_unit='day' (default) will
+-- also be corrected from their actual duration_days value.
 UPDATE `plans`
   SET `duration_value` = `duration_days`,
       `duration_unit`  = 'day'
-  WHERE `duration_value` = 30 AND `duration_days` != 30;
+  WHERE `duration_unit` = 'day';  -- covers default-inserted rows from this migration
 
 -- ============================================================
 -- 2. Newsletters table
