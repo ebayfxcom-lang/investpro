@@ -16,6 +16,7 @@
           <tr>
             <th>#</th>
             <th>Title</th>
+            <th>Publisher</th>
             <th>Status</th>
             <th>Published At</th>
             <th>Created</th>
@@ -28,6 +29,7 @@
             <tr>
               <td class="text-muted small">{$n.id}</td>
               <td class="fw-semibold">{$n.title|escape|truncate:60:'...'}</td>
+              <td class="text-muted small">{$n.publisher_name|default:'—'|escape}</td>
               <td>
                 <span class="badge {if $n.status == 'published'}bg-success bg-opacity-25 text-success{else}bg-secondary bg-opacity-25 text-muted{/if}">
                   {$n.status|ucfirst}
@@ -40,7 +42,9 @@
               <td class="text-end">
                 <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editNewsModal"
                   data-id="{$n.id}" data-title="{$n.title|escape:'html'}"
-                  data-content="{$n.content|escape:'html'}" data-status="{$n.status}">
+                  data-content="{$n.content|escape:'html'}" data-status="{$n.status}"
+                  data-publisher="{$n.publisher_name|default:''|escape:'html'}"
+                  data-hashtags="{$n.hashtags|default:''|escape:'html'}">
                   <i class="fas fa-pen"></i>
                 </button>
                 <form method="POST" action="/admin/news" class="d-inline">
@@ -93,8 +97,17 @@
             <input type="text" name="title" class="form-control" required>
           </div>
           <div class="mb-3">
+            <label class="form-label fw-semibold">Publisher Name</label>
+            <input type="text" name="publisher_name" class="form-control" placeholder="Author or publisher name">
+          </div>
+          <div class="mb-3">
             <label class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
             <textarea name="content" class="form-control" rows="6" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Hashtags</label>
+            <input type="text" name="hashtags" class="form-control" placeholder="#bitcoin, #investment, #crypto">
+            <div class="form-text">Comma-separated hashtags for SEO and discoverability.</div>
           </div>
           <div>
             <label class="form-label fw-semibold">Status</label>
@@ -131,8 +144,16 @@
             <input type="text" name="title" id="editNewsTitle" class="form-control" required>
           </div>
           <div class="mb-3">
+            <label class="form-label fw-semibold">Publisher Name</label>
+            <input type="text" name="publisher_name" id="editNewsPublisher" class="form-control" placeholder="Author or publisher name">
+          </div>
+          <div class="mb-3">
             <label class="form-label fw-semibold">Content</label>
             <textarea name="content" id="editNewsContent" class="form-control" rows="6" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Hashtags</label>
+            <input type="text" name="hashtags" id="editNewsHashtags" class="form-control" placeholder="#bitcoin, #investment">
           </div>
           <div>
             <label class="form-label fw-semibold">Status</label>
@@ -155,10 +176,12 @@
 (function () {
   document.getElementById('editNewsModal').addEventListener('show.bs.modal', function (e) {
     const btn = e.relatedTarget;
-    document.getElementById('editNewsId').value      = btn.dataset.id;
-    document.getElementById('editNewsTitle').value   = btn.dataset.title;
-    document.getElementById('editNewsContent').value = btn.dataset.content;
-    document.getElementById('editNewsStatus').value  = btn.dataset.status;
+    document.getElementById('editNewsId').value        = btn.dataset.id;
+    document.getElementById('editNewsTitle').value     = btn.dataset.title;
+    document.getElementById('editNewsContent').value   = btn.dataset.content;
+    document.getElementById('editNewsStatus').value    = btn.dataset.status;
+    document.getElementById('editNewsPublisher').value = btn.dataset.publisher || '';
+    document.getElementById('editNewsHashtags').value  = btn.dataset.hashtags || '';
   });
 }());
 </script>

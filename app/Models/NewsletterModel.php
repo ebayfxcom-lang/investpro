@@ -19,13 +19,20 @@ class NewsletterModel extends Model
         return $this->findAll("status = 'draft'", [], 'created_at DESC');
     }
 
-    public function markSent(int $id, int $sentCount): void
+    public function markSent(int $id, int $sentCount, ?int $sentByUserId = null, ?string $senderName = null): void
     {
-        $this->update($id, [
+        $data = [
             'status'     => 'sent',
             'sent_at'    => date('Y-m-d H:i:s'),
             'sent_count' => $sentCount,
             'updated_at' => date('Y-m-d H:i:s'),
-        ]);
+        ];
+        if ($sentByUserId !== null) {
+            $data['sent_by'] = $sentByUserId;
+        }
+        if ($senderName !== null) {
+            $data['sender_name'] = $senderName;
+        }
+        $this->update($id, $data);
     }
 }

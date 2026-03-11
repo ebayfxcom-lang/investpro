@@ -64,7 +64,8 @@
   {if $data.total_pages > 1}
   <div class="card-footer bg-white d-flex align-items-center justify-content-between flex-wrap gap-2 py-3">
     <div class="text-muted small">
-      Showing {($data.page - 1) * $data.per_page + 1}–{min($data.page * $data.per_page, $data.total)}
+      {assign var="end_item" value=$data.page * $data.per_page}
+      Showing {($data.page - 1) * $data.per_page + 1}–{if $end_item > $data.total}{$data.total}{else}{$end_item}{/if}
       of {$data.total} records
     </div>
     <nav aria-label="Spin history pagination">

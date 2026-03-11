@@ -47,6 +47,7 @@ class SpinController extends Controller
                 if ($slotId > 0) {
                     $rewardModel->update($slotId, [
                         'label'        => trim($request->post('label', '')),
+                        'spin_mode'    => in_array($request->post('spin_mode'), ['free','paid','both']) ? $request->post('spin_mode') : 'both',
                         'reward_type'  => $request->post('reward_type', 'no_reward'),
                         'reward_value' => max(0, (float)$request->post('reward_value', 0)),
                         'probability'  => max(0.0001, (float)$request->post('probability', 8.333333)),

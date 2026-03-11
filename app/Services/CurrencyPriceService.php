@@ -11,20 +11,101 @@ class CurrencyPriceService
     private CurrencyModel $currencyModel;
     private CurrencyPriceHistoryModel $priceHistoryModel;
 
-    // CoinGecko IDs for common crypto symbols
+    // CoinGecko IDs for all 100 supported crypto symbols
     private const COINGECKO_IDS = [
-        'BTC'  => 'bitcoin',
-        'ETH'  => 'ethereum',
-        'LTC'  => 'litecoin',
-        'XRP'  => 'ripple',
-        'USDT' => 'tether',
-        'USDC' => 'usd-coin',
-        'BNB'  => 'binancecoin',
-        'SOL'  => 'solana',
-        'ADA'  => 'cardano',
-        'DOGE' => 'dogecoin',
-        'TRX'  => 'tron',
-        'MATIC'=> 'matic-network',
+        'BTC'     => 'bitcoin',
+        'ETH'     => 'ethereum',
+        'USDT'    => 'tether',
+        'BNB'     => 'binancecoin',
+        'XRP'     => 'ripple',
+        'USDC'    => 'usd-coin',
+        'SOL'     => 'solana',
+        'TRX'     => 'tron',
+        'DOGE'    => 'dogecoin',
+        'WBT'     => 'whitebit',
+        'ADA'     => 'cardano',
+        'BCH'     => 'bitcoin-cash',
+        'HYPE'    => 'hyperliquid',
+        'LEO'     => 'leo-token',
+        'XMR'     => 'monero',
+        'LINK'    => 'chainlink',
+        'XLM'     => 'stellar',
+        'DAI'     => 'dai',
+        'LTC'     => 'litecoin',
+        'AVAX'    => 'avalanche-2',
+        'HBAR'    => 'hedera-hashgraph',
+        'PYUSD'   => 'paypal-usd',
+        'SUI'     => 'sui',
+        'ZEC'     => 'zcash',
+        'SHIB'    => 'shiba-inu',
+        'TON'     => 'the-open-network',
+        'CRO'     => 'crypto-com-chain',
+        'PAXG'    => 'pax-gold',
+        'DOT'     => 'polkadot',
+        'UNI'     => 'uniswap',
+        'MNT'     => 'mantle',
+        'PI'      => 'pi-network',
+        'OKB'     => 'okb',
+        'TAO'     => 'bittensor',
+        'AAVE'    => 'aave',
+        'NEAR'    => 'near',
+        'BGB'     => 'bitget-token',
+        'ICP'     => 'internet-computer',
+        'ETC'     => 'ethereum-classic',
+        'ONDO'    => 'ondo-finance',
+        'KCS'     => 'kucoin-shares',
+        'WLD'     => 'worldcoin-wld',
+        'QNT'     => 'quant-network',
+        'ENA'     => 'ethena',
+        'KAS'     => 'kaspa',
+        'RENDER'  => 'render-token',
+        'ALGO'    => 'algorand',
+        'FLR'     => 'flare-networks',
+        'APT'     => 'aptos',
+        'FIL'     => 'filecoin',
+        'VET'     => 'vechain',
+        'ARB'     => 'arbitrum',
+        'JUP'     => 'jupiter-exchange-solana',
+        'BONK'    => 'bonk',
+        'TUSD'    => 'true-usd',
+        'DCR'     => 'decred',
+        'STX'     => 'blockstack',
+        'CAKE'    => 'pancakeswap-token',
+        'ZRO'     => 'layerzero',
+        'SEI'     => 'sei-network',
+        'DASH'    => 'dash',
+        'CHZ'     => 'chiliz',
+        'XTZ'     => 'tezos',
+        'FET'     => 'fetch-ai',
+        'CRV'     => 'curve-dao-token',
+        'BTT'     => 'bittorrent',
+        'BSV'     => 'bitcoin-sv',
+        'INJ'     => 'injective-protocol',
+        'TIA'     => 'celestia',
+        'FLOKI'   => 'floki',
+        'JASMY'   => 'jasmycoin',
+        'GRT'     => 'the-graph',
+        'IOTA'    => 'iota',
+        'PYTH'    => 'pyth-network',
+        'OP'      => 'optimism',
+        'LDO'     => 'lido-dao',
+        'ENS'     => 'ethereum-name-service',
+        'LUNC'    => 'terra-luna',
+        'SAND'    => 'the-sandbox',
+        'HNT'     => 'helium',
+        'PENDLE'  => 'pendle',
+        'TWT'     => 'trust-wallet-token',
+        'DEXE'    => 'dexe',
+        'AXS'     => 'axie-infinity',
+        'COMP'    => 'compound-governance-token',
+        'THETA'   => 'theta-token',
+        'NEO'     => 'neo',
+        'MANA'    => 'decentraland',
+        'GALA'    => 'gala',
+        'AR'      => 'arweave',
+        // Legacy/common aliases
+        'MATIC'   => 'matic-network',
+        'ATOM'    => 'cosmos',
     ];
 
     // ECB / open exchange for fiat rates (use exchangerate.host free API)
@@ -71,52 +152,56 @@ class CurrencyPriceService
         $updated = [];
         $failed  = [];
 
-        // Build list of CoinGecko IDs
-        $ids = [];
+        // Build list of CoinGecko IDs for currencies that have a mapping
         $codeToId = [];
         foreach ($cryptos as $c) {
             $code = strtoupper($c['code']);
             if (isset(self::COINGECKO_IDS[$code])) {
-                $ids[]          = self::COINGECKO_IDS[$code];
                 $codeToId[$code] = self::COINGECKO_IDS[$code];
+            } else {
+                // Mark unmapped currencies as failed (no CoinGecko ID known)
+                $failed[] = $code;
             }
         }
 
-        if (empty($ids)) {
+        if (empty($codeToId)) {
             return ['updated' => $updated, 'failed' => $failed];
         }
 
-        $idsStr = implode(',', $ids);
-        $url    = "https://api.coingecko.com/api/v3/simple/price?ids={$idsStr}&vs_currencies=usd,eur";
-
-        $data = $this->fetchJson($url);
-        if ($data === null) {
-            foreach ($cryptos as $c) {
-                $failed[] = $c['code'];
-            }
-            return ['updated' => $updated, 'failed' => $failed];
-        }
-
-        // Build reverse map: geckoId => code
+        // CoinGecko allows up to 250 IDs per request; chunk if needed
+        $idChunks = array_chunk($codeToId, 200, true);
         $idToCode = array_flip($codeToId);
 
-        foreach ($data as $geckoId => $prices) {
-            $code = $idToCode[$geckoId] ?? null;
-            if (!$code) {
+        foreach ($idChunks as $chunk) {
+            $idsStr = implode(',', array_values($chunk));
+            $url    = "https://api.coingecko.com/api/v3/simple/price?ids={$idsStr}&vs_currencies=usd,eur";
+
+            $data = $this->fetchJson($url);
+            if ($data === null) {
+                foreach (array_keys($chunk) as $code) {
+                    $failed[] = $code;
+                }
                 continue;
             }
-            $priceUsd = (float)($prices['usd'] ?? 0);
-            $priceEur = (float)($prices['eur'] ?? 0);
-            if ($priceUsd <= 0) {
-                $failed[] = $code;
-                continue;
+
+            foreach ($data as $geckoId => $prices) {
+                $code = $idToCode[$geckoId] ?? null;
+                if (!$code) {
+                    continue;
+                }
+                $priceUsd = (float)($prices['usd'] ?? 0);
+                $priceEur = (float)($prices['eur'] ?? 0);
+                if ($priceUsd <= 0) {
+                    $failed[] = $code;
+                    continue;
+                }
+                // Convention: rate_to_usd = units of this currency per 1 USD
+                // e.g. 1 BTC = 65000 USD → rate_to_usd = 1/65000 ≈ 0.0000154
+                $rateToUsd = 1.0 / $priceUsd;
+                $this->currencyModel->updateRate($code, $rateToUsd);
+                $this->priceHistoryModel->recordPrice($code, $priceUsd, $priceEur > 0 ? $priceEur : null, 'coingecko');
+                $updated[] = $code;
             }
-            // Convention: rate_to_usd = units of this currency per 1 USD
-            // e.g. 1 BTC = 65000 USD → rate_to_usd = 1/65000 ≈ 0.0000154
-            $rateToUsd = 1.0 / $priceUsd;
-            $this->currencyModel->updateRate($code, $rateToUsd);
-            $this->priceHistoryModel->recordPrice($code, $priceUsd, $priceEur > 0 ? $priceEur : null, 'coingecko');
-            $updated[] = $code;
         }
 
         return ['updated' => $updated, 'failed' => $failed];

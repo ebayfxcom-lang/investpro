@@ -308,7 +308,7 @@
       ctx.rotate(start + ARC / 2);
       ctx.textAlign  = 'right';
       ctx.fillStyle  = '#fff';
-      ctx.font       = `bold ${Math.max(10, Math.floor(R / N * 1.1))}px Segoe UI, sans-serif`;
+      ctx.font       = 'bold ' + Math.max(10, Math.floor(R / N * 1.1)) + 'px Segoe UI, sans-serif';
       ctx.shadowColor = 'rgba(0,0,0,.5)';
       ctx.shadowBlur  = 3;
       ctx.fillText(seg.label, R - 12, 5);
@@ -406,7 +406,7 @@
           data.reward_amount > 0 ? 'You won!' : 'Better luck next time!',
           data.reward_label || 'No Prize',
           data.reward_amount > 0
-            ? `+$${parseFloat(data.reward_amount).toFixed(2)} has been credited to your account.`
+            ? '+$' + parseFloat(data.reward_amount).toFixed(2) + ' has been credited to your account.'
             : 'No reward this time. Try again!'
         );
         /* Reload to refresh spin count */
