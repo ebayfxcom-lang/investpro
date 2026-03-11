@@ -57,7 +57,25 @@ class DepositController extends Controller
             $conversionService = new ConversionService();
             $snapshot = $conversionService->buildSnapshot($amount, $currency);
 
-            $expiresAt = date('Y-m-d H:i:s', strtotime("+{$plan['duration_days']} days"));
+            // Calculate expiry based on flexible duration_value + duration_unit.
+            // When duration_value is not set, fall back to duration_days with unit 'day'.
+            $durationValue = (int)($plan['duration_value'] ?? 0);
+            $durationUnit  = $plan['duration_unit'] ?? 'day';
+            if ($durationValue <= 0) {
+                // Legacy fallback: always treat duration_days as days
+                $durationValue = (int)($plan['duration_days'] ?? 30);
+                $durationUnit  = 'day';
+            }
+            // Normalise unit to PHP date modifier
+            $unitMap = [
+                'hour'  => 'hour',
+                'day'   => 'day',
+                'week'  => 'week',
+                'month' => 'month',
+                'year'  => 'year',
+            ];
+            $phpUnit   = $unitMap[$durationUnit] ?? 'day';
+            $expiresAt = date('Y-m-d H:i:s', strtotime("+{$durationValue} {$phpUnit}"));
 
             $depositModel = new DepositModel();
             $depositId = $depositModel->create([

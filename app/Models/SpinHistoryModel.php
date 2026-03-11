@@ -35,4 +35,28 @@ class SpinHistoryModel extends Model
         );
         return (float)($row['total'] ?? 0);
     }
+
+    /**
+     * Paginate spin history with username join for admin display.
+     */
+    public function paginateWithUsers(int $page, int $perPage = 30): array
+    {
+        $offset = ($page - 1) * $perPage;
+        $total  = $this->count();
+        $items  = $this->db->fetchAll(
+            "SELECT sh.*, u.username
+             FROM spin_history sh
+             LEFT JOIN users u ON sh.user_id = u.id
+             ORDER BY sh.created_at DESC
+             LIMIT ? OFFSET ?",
+            [$perPage, $offset]
+        );
+        return [
+            'items'       => $items,
+            'total'       => $total,
+            'page'        => $page,
+            'per_page'    => $perPage,
+            'total_pages' => (int)ceil($total / max(1, $perPage)),
+        ];
+    }
 }

@@ -28,7 +28,7 @@ class AddFundsController extends Controller
 
         $data = $userModel->paginate($page, 20, $where, $params);
 
-        $this->view('admin/add-funds/index', [
+        $this->view('admin/users/add-funds-list', [
             'title'  => 'Add Funds',
             'data'   => $data,
             'search' => $search,

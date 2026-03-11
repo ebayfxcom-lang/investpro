@@ -10,6 +10,7 @@ use App\Core\Csrf;
 use App\Core\AuditLog;
 use App\Models\CurrencyModel;
 use App\Services\ConversionService;
+use App\Services\CurrencyPriceService;
 
 class ExchangeRatesController extends Controller
 {
@@ -25,8 +26,22 @@ class ExchangeRatesController extends Controller
                 $this->redirect('/admin/exchange-rates');
             }
 
+            $action = $request->post('action', '');
+
+            // Sync all rates from external APIs
+            if ($action === 'sync') {
+                $service = new CurrencyPriceService();
+                $result  = $service->syncAll();
+                $count   = count($result['updated']);
+                (new AuditLog())->log('exchange_rates_synced', "Exchange rates synced: {$count} updated", Auth::id('admin'), $request->ip());
+                $this->flash('success', "Rates synced. Updated: " . implode(', ', $result['updated'] ?: ['none']));
+                $this->redirect('/admin/exchange-rates');
+            }
+
+            // Manual single-rate update (action=update)
             $code = strtoupper(trim($request->post('code', '')));
-            $rate = (float)$request->post('rate_to_usd', 1.0);
+            // Template sends field "rate"; also accept "rate_to_usd" for backwards compatibility
+            $rate = (float)($request->post('rate', null) ?? $request->post('rate_to_usd', 0));
 
             if ($code && $rate > 0) {
                 $currencyModel->updateRate($code, $rate);

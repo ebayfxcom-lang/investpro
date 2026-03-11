@@ -17,7 +17,7 @@ class EarningsController extends Controller
         $earningsModel = new EarningsModel();
         $page   = (int)($request->get('page', 1));
         $stats  = $earningsModel->getStats();
-        $data   = $earningsModel->paginate($page, 20, '', [], 'created_at DESC');
+        $data   = $earningsModel->paginateWithUsers($page, 20);
 
         $this->view('admin/earnings/index', [
             'title'  => 'Earnings Overview',

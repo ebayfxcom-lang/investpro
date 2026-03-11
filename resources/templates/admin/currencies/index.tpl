@@ -20,7 +20,7 @@
         <div>
           <div class="text-muted small text-uppercase fw-semibold">Active</div>
           <div class="h3 fw-bold mt-1 mb-0">
-            {$currencies|@array_filter:'status == "active"'|count|default:0}
+            {$currency_stats.active|default:0}
           </div>
         </div>
         <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
@@ -32,7 +32,7 @@
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <div class="text-muted small text-uppercase fw-semibold">Fiat</div>
-          <div class="h3 fw-bold mt-1 mb-0" id="statFiat">—</div>
+          <div class="h3 fw-bold mt-1 mb-0" id="statFiat">{$currency_stats.fiat|default:0}</div>
         </div>
         <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="fas fa-money-bill"></i></div>
       </div>
@@ -43,7 +43,7 @@
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <div class="text-muted small text-uppercase fw-semibold">Crypto</div>
-          <div class="h3 fw-bold mt-1 mb-0" id="statCrypto">—</div>
+          <div class="h3 fw-bold mt-1 mb-0" id="statCrypto">{$currency_stats.crypto|default:0}</div>
         </div>
         <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="fab fa-bitcoin"></i></div>
       </div>

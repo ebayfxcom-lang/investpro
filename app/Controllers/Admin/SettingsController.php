@@ -64,6 +64,25 @@ class SettingsController extends Controller
                 'referral_level2'     => (float)$request->post('referral_level2', 0),
                 'referral_level3'     => (float)$request->post('referral_level3', 0),
                 'referral_on_deposit' => (int)$request->post('referral_on_deposit', 1),
+                // Threshold mode: 'flat' = fixed rate, 'count' = based on downline count, 'deposit' = based on deposit volume
+                'referral_threshold_mode'    => $request->post('referral_threshold_mode', 'flat'),
+                'referral_min_downlines'     => (int)$request->post('referral_min_downlines', 0),
+                'referral_min_deposit'       => (float)$request->post('referral_min_deposit', 0),
+                // Level 1 threshold tiers (count-based)
+                'referral_l1_threshold1_count' => (int)$request->post('referral_l1_threshold1_count', 0),
+                'referral_l1_threshold1_rate'  => (float)$request->post('referral_l1_threshold1_rate', 5),
+                'referral_l1_threshold2_count' => (int)$request->post('referral_l1_threshold2_count', 10),
+                'referral_l1_threshold2_rate'  => (float)$request->post('referral_l1_threshold2_rate', 7),
+                'referral_l1_threshold3_count' => (int)$request->post('referral_l1_threshold3_count', 25),
+                'referral_l1_threshold3_rate'  => (float)$request->post('referral_l1_threshold3_rate', 10),
+                // Level 2 threshold tiers
+                'referral_l2_threshold1_rate'  => (float)$request->post('referral_l2_threshold1_rate', 2),
+                'referral_l2_threshold2_rate'  => (float)$request->post('referral_l2_threshold2_rate', 3),
+                'referral_l2_threshold3_rate'  => (float)$request->post('referral_l2_threshold3_rate', 5),
+                // Level 3 threshold tiers
+                'referral_l3_threshold1_rate'  => (float)$request->post('referral_l3_threshold1_rate', 1),
+                'referral_l3_threshold2_rate'  => (float)$request->post('referral_l3_threshold2_rate', 1.5),
+                'referral_l3_threshold3_rate'  => (float)$request->post('referral_l3_threshold3_rate', 2),
             ]);
             $this->flash('success', 'Referral settings saved.');
             $this->redirect('/admin/settings/referral');
@@ -80,9 +99,36 @@ class SettingsController extends Controller
     {
         $this->requireAuth('admin');
         $currencyModel = new \App\Models\CurrencyModel();
+
+        if ($request->isPost()) {
+            if (!Csrf::validateRequest($request)) {
+                $this->flash('error', 'Invalid CSRF token.');
+                $this->redirect('/admin/settings/currencies');
+            }
+            $action = $request->post('action', '');
+            $code   = strtoupper(trim($request->post('code', '')));
+
+            if ($action === 'toggle' && $code) {
+                $existing = $currencyModel->findByCode($code);
+                if ($existing && $existing['type'] === 'fiat') {
+                    $newStatus = $existing['status'] === 'active' ? 'inactive' : 'active';
+                    $currencyModel->update((int)$existing['id'], [
+                        'status'     => $newStatus,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    (new AuditLog())->log('fiat_currency_toggled', "Fiat {$code} → {$newStatus}", Auth::id('admin'), $request->ip());
+                    $this->flash('success', "Fiat currency {$code} is now {$newStatus}.");
+                }
+            }
+            $this->redirect('/admin/settings/currencies');
+        }
+
+        // Show only fiat currencies on this page
+        $fiats = $currencyModel->findAll("type = 'fiat'", [], 'sort_order ASC, code ASC');
+
         $this->view('admin/settings/currencies', [
-            'title'      => 'Currencies',
-            'currencies' => $currencyModel->findAll('', [], 'sort_order ASC, code ASC'),
+            'title'      => 'Fiat Currencies',
+            'currencies' => $fiats,
             'admin'      => Auth::user('admin'),
         ]);
     }
