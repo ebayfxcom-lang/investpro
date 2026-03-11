@@ -79,7 +79,7 @@ class SpinController extends Controller
 
         $historyModel = new SpinHistoryModel();
         $page         = (int)($request->get('page', 1));
-        $data         = $historyModel->paginate($page, 30, '', [], 'created_at DESC');
+        $data         = $historyModel->paginateWithUsers($page, 30);
 
         $this->view('admin/spin/history', [
             'title'   => 'Spin History',

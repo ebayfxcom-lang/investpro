@@ -43,8 +43,20 @@
               </select>
             </div>
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Duration (days) <span class="text-danger">*</span></label>
-              <input type="number" name="duration_days" class="form-control" value="{$plan.duration_days|default:30}" required>
+              <label class="form-label fw-semibold">Duration <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" name="duration_value" class="form-control"
+                       value="{$plan.duration_value|default:$plan.duration_days|default:30}" min="1" required>
+                <select name="duration_unit" class="form-select" style="max-width:120px;">
+                  {foreach ['hour','day','week','month','year'] as $unit}
+                  <option value="{$unit}"
+                    {if ($plan.duration_unit|default:'day') == $unit}selected{/if}>
+                    {$unit|ucfirst}s
+                  </option>
+                  {/foreach}
+                </select>
+              </div>
+              <div class="form-text">e.g. 30 Days, 4 Weeks, 12 Months</div>
             </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">Currency</label>

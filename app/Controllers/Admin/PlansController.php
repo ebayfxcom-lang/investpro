@@ -40,7 +40,9 @@ class PlansController extends Controller
                 'max_amount'    => (float)$request->post('max_amount'),
                 'roi_percent'   => (float)$request->post('roi_percent'),
                 'roi_period'    => $request->post('roi_period', 'daily'),
-                'duration_days' => (int)$request->post('duration_days'),
+                'duration_value' => max(1, (int)$request->post('duration_value', 30)),
+                'duration_unit' => $request->post('duration_unit', 'day'),
+                'duration_days' => (int)$request->post('duration_value', 30), // legacy compat
                 'principal_return' => (int)$request->post('principal_return', 1),
                 'currency'      => strtoupper($request->post('currency', 'USD')),
                 'status'        => $request->post('status', 'active'),
@@ -79,7 +81,9 @@ class PlansController extends Controller
                 'max_amount'    => (float)$request->post('max_amount'),
                 'roi_percent'   => (float)$request->post('roi_percent'),
                 'roi_period'    => $request->post('roi_period', 'daily'),
-                'duration_days' => (int)$request->post('duration_days'),
+                'duration_value' => max(1, (int)$request->post('duration_value', 30)),
+                'duration_unit' => $request->post('duration_unit', 'day'),
+                'duration_days' => (int)$request->post('duration_value', 30), // legacy compat
                 'principal_return' => (int)$request->post('principal_return', 1),
                 'currency'      => strtoupper($request->post('currency', 'USD')),
                 'status'        => $request->post('status', 'active'),

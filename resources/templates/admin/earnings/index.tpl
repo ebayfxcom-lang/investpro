@@ -36,8 +36,10 @@
         <thead class="table-light">
           <tr>
             <th>#</th>
-            <th>User ID</th>
+            <th>User</th>
             <th>Amount</th>
+            <th>Currency</th>
+            <th>Type</th>
             <th>Status</th>
             <th>Date</th>
           </tr>
@@ -46,13 +48,25 @@
           {foreach $data.items as $e}
           <tr>
             <td class="text-muted small">{$e.id}</td>
-            <td>{$e.user_id}</td>
+            <td>
+              {if $e.username}
+                <a href="/admin/users/{$e.user_id}" class="fw-semibold text-decoration-none">{$e.username|escape}</a>
+              {else}
+                <span class="text-muted">#{$e.user_id}</span>
+              {/if}
+            </td>
             <td class="fw-semibold">${$e.amount|string_format:"%.2f"}</td>
+            <td>
+              <span class="badge bg-info bg-opacity-25 text-info font-monospace">
+                {$e.deposit_currency|default:'USD'}
+              </span>
+            </td>
+            <td><span class="badge bg-secondary bg-opacity-25 text-dark">{$e.type|default:'roi'|ucfirst}</span></td>
             <td><span class="badge badge-status-{$e.status}">{$e.status|ucfirst}</span></td>
             <td class="text-muted small">{$e.created_at|date_format:'%b %d, %Y %H:%M'}</td>
           </tr>
           {foreachelse}
-          <tr><td colspan="5" class="text-center text-muted py-4">No earnings records found.</td></tr>
+          <tr><td colspan="7" class="text-center text-muted py-4">No earnings records found.</td></tr>
           {/foreach}
         </tbody>
       </table>

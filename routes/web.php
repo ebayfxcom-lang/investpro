@@ -109,15 +109,19 @@ $router->get('/admin/referrals', [Admin\ReferralEarningsController::class, 'inde
 
 // FAQ
 $router->get('/admin/faq', [Admin\FaqController::class, 'index']);
+$router->post('/admin/faq', [Admin\FaqController::class, 'index']);
 
 // News
 $router->get('/admin/news', [Admin\NewsController::class, 'index']);
+$router->post('/admin/news', [Admin\NewsController::class, 'index']);
 
 // Custom Pages
 $router->get('/admin/pages', [Admin\PagesController::class, 'index']);
+$router->post('/admin/pages', [Admin\PagesController::class, 'index']);
 
 // Newsletter
 $router->get('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
+$router->post('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
 
 // Performance
 $router->get('/admin/performance', [Admin\PerformanceController::class, 'index']);
@@ -136,6 +140,10 @@ $router->get('/admin/currencies', [Admin\CurrencyController::class, 'index']);
 $router->post('/admin/currencies', [Admin\CurrencyController::class, 'index']);
 $router->get('/admin/currencies/price-history', [Admin\CurrencyController::class, 'priceHistory']);
 
+// Crypto Currencies (separate page)
+$router->get('/admin/crypto-currencies', [Admin\CurrencyController::class, 'crypto']);
+$router->post('/admin/crypto-currencies', [Admin\CurrencyController::class, 'crypto']);
+
 // Exchange Rates
 $router->get('/admin/exchange-rates', [Admin\ExchangeRatesController::class, 'index']);
 $router->post('/admin/exchange-rates', [Admin\ExchangeRatesController::class, 'index']);
@@ -145,8 +153,17 @@ $router->get('/admin/spin', [Admin\SpinController::class, 'index']);
 $router->post('/admin/spin', [Admin\SpinController::class, 'index']);
 $router->get('/admin/spin/history', [Admin\SpinController::class, 'history']);
 
+// Scam Reports (admin)
+$router->get('/admin/scam-reports', [Admin\ScamReportsController::class, 'index']);
+$router->post('/admin/scam-reports', [Admin\ScamReportsController::class, 'index']);
+$router->get('/admin/scam-reports/{id}', [Admin\ScamReportsController::class, 'view']);
+
 // User Spin
 $router->get('/user/spin', [User\SpinController::class, 'index']);
 $router->post('/user/spin', [User\SpinController::class, 'index']);
+
+// Scam report submission (public)
+$router->get('/report-scam', [User\ScamReportController::class, 'create']);
+$router->post('/report-scam', [User\ScamReportController::class, 'create']);
 
 return $router;
