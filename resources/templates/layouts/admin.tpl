@@ -125,6 +125,15 @@
     <a class="nav-link" href="/admin/community/bots"><i class="fas fa-robot"></i> Bot Profiles</a>
     {/if}
 
+    <div class="nav-section">Support</div>
+    <a class="nav-link" href="/admin/support"><i class="fas fa-headset"></i> Support Tickets</a>
+    <a class="nav-link" href="/admin/notices"><i class="fas fa-bell"></i> User Notices</a>
+
+    <div class="nav-section">Management</div>
+    <a class="nav-link" href="/admin/team"><i class="fas fa-users-gear"></i> Team Roles</a>
+    <a class="nav-link" href="/admin/team/members"><i class="fas fa-user-tie"></i> Team Members</a>
+    <a class="nav-link" href="/admin/seo"><i class="fas fa-search"></i> SEO &amp; Meta</a>
+
     <div class="nav-section">System</div>
     <a class="nav-link" href="/admin/newsletter"><i class="fas fa-mail-bulk"></i> Newsletter</a>
     <a class="nav-link" href="/admin/performance"><i class="fas fa-chart-bar"></i> Performance</a>

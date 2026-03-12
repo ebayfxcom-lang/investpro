@@ -108,6 +108,7 @@
     <a class="nav-link" href="/user/rewards"><i class="fas fa-gift"></i> Rewards Hub</a>
     {/if}
     <div class="nav-divider"></div>
+    <a class="nav-link" href="/user/support"><i class="fas fa-headset"></i> Support</a>
     <a class="nav-link" href="/user/security"><i class="fas fa-shield-halved"></i> Security</a>
     <a class="nav-link" href="/user/settings"><i class="fas fa-user-cog"></i> Settings</a>
     <a class="nav-link" style="color:rgba(255,80,80,.8)" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
