@@ -6,6 +6,7 @@ namespace App\Controllers\User;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Auth;
+use App\Core\Csrf;
 use App\Models\UserModel;
 use App\Models\DepositModel;
 use App\Models\WithdrawalModel;
@@ -13,6 +14,7 @@ use App\Models\TransactionModel;
 use App\Models\EarningsModel;
 use App\Models\WalletModel;
 use App\Models\ReferralModel;
+use App\Models\UserNoticeModel;
 
 class DashboardController extends Controller
 {
@@ -29,6 +31,7 @@ class DashboardController extends Controller
         $earningsModel   = new EarningsModel();
         $walletModel     = new WalletModel();
         $referralModel   = new ReferralModel();
+        $noticeModel     = new UserNoticeModel();
 
         $user            = $userModel->find($userId);
         $wallets         = $walletModel->getUserWallets($userId);
@@ -37,6 +40,9 @@ class DashboardController extends Controller
         $referralStats   = $referralModel->getReferralStats($userId);
         $totalDeposited  = $depositModel->getTotalDepositsByUser($userId);
         $totalEarnings   = $earningsModel->getTotalEarnings($userId);
+
+        $userHasDeposit  = !empty($activeDeposits);
+        $notices         = $noticeModel->getActiveForUser($userId, $user['account_type'] ?? 'normal', $userHasDeposit);
 
         $this->view('user/dashboard', [
             'title'           => 'My Dashboard',
@@ -47,6 +53,22 @@ class DashboardController extends Controller
             'referral_stats'  => $referralStats,
             'total_deposited' => $totalDeposited,
             'total_earnings'  => $totalEarnings,
+            'notices'         => $notices,
         ]);
+    }
+
+    public function markNoticeRead(Request $request): void
+    {
+        $this->requireAuth('user');
+        if (!Csrf::validateRequest($request)) {
+            $this->json(['success' => false], 403);
+            return;
+        }
+        $noticeId = (int)$request->post('notice_id', 0);
+        if ($noticeId > 0) {
+            $model = new UserNoticeModel();
+            $model->markRead($noticeId, (int)Auth::id('user'));
+        }
+        $this->json(['success' => true]);
     }
 }

@@ -1,6 +1,28 @@
 {extends file="layouts/user.tpl"}
 {block name="content"}
 
+{if isset($notices) && $notices}
+<div class="mb-3" id="noticesContainer">
+  {foreach $notices as $notice}
+  <div class="alert alert-{$notice.notice_type} alert-dismissible fade show" id="notice-{$notice.id}">
+    <strong>{$notice.title|escape}</strong>
+    {if $notice.body} — {$notice.body|escape}{/if}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"
+            onclick="markNoticeRead({$notice.id})"></button>
+  </div>
+  {/foreach}
+</div>
+<script>
+function markNoticeRead(id) {
+  fetch('/user/notices/read', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: '_csrf_token=' + encodeURIComponent(document.querySelector('meta[name="csrf-token"]')?.content || '') + '&notice_id=' + id
+  });
+}
+</script>
+{/if}
+
 <div class="row g-3 mb-4">
   {foreach $wallets as $wallet}
   <div class="col-sm-6 col-xl-3">

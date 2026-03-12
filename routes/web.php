@@ -249,4 +249,7 @@ $router->post('/user/support/{id}', [User\SupportController::class, 'show']);
 // Notices (mark read via AJAX)
 $router->post('/user/notices/read', [User\DashboardController::class, 'markNoticeRead']);
 
+// Quick Navigation
+$router->get('/admin/quick-nav', [Admin\QuickNavController::class, 'index']);
+
 return $router;

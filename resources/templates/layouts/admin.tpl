@@ -83,6 +83,7 @@
   <nav class="py-2">
     <div class="nav-section">Overview</div>
     <a class="nav-link" href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a class="nav-link" href="/admin/quick-nav"><i class="fas fa-compass"></i> Quick Nav</a>
 
     <div class="nav-section">Investments</div>
     <a class="nav-link" href="/admin/plans"><i class="fas fa-layer-group"></i> Plans</a>
