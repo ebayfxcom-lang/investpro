@@ -9,6 +9,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\AuditLog;
 use App\Models\UserModel;
+use App\Services\TotpService;
 
 class AuthController extends Controller
 {
@@ -35,6 +36,13 @@ class AuthController extends Controller
                     $this->flash('error', 'Your account has been suspended.');
                     $this->redirect('/login');
                 }
+
+                // If 2FA is enabled, require TOTP verification before full login
+                if (!empty($user['two_factor'])) {
+                    $this->session->set('pending_2fa_user_id', (int)$user['id']);
+                    $this->redirect('/login/2fa');
+                }
+
                 Auth::login($user, 'user');
                 // Grant daily free spins
                 try {
@@ -131,6 +139,67 @@ class AuthController extends Controller
             'title' => 'Register',
             'ref'   => $request->get('ref', ''),
         ]);
+    }
+
+    public function verifyTwoFactor(Request $request): void
+    {
+        if (Auth::check('user')) {
+            $this->redirect('/user/dashboard');
+        }
+
+        $pendingUserId = $this->session->get('pending_2fa_user_id');
+        if (!$pendingUserId) {
+            $this->redirect('/login');
+        }
+
+        if ($request->isPost()) {
+            if (!Csrf::validateRequest($request)) {
+                $this->flash('error', 'Invalid CSRF token.');
+                $this->redirect('/login/2fa');
+            }
+
+            $code      = trim($request->post('totp_code', ''));
+            $userModel = new UserModel();
+            $user      = $userModel->find((int)$pendingUserId);
+            $totp      = new TotpService();
+
+            if (!$user) {
+                $this->session->remove('pending_2fa_user_id');
+                $this->redirect('/login');
+            }
+
+            // Check TOTP code
+            if ($totp->verify((string)$user['two_factor_secret'], $code)) {
+                $this->session->remove('pending_2fa_user_id');
+                Auth::login($user, 'user');
+                try {
+                    (new \App\Services\SpinService())->grantDailyFreeSpins((int)$user['id']);
+                } catch (\Throwable $e) {
+                    error_log('SpinService::grantDailyFreeSpins failed: ' . $e->getMessage());
+                }
+                (new AuditLog())->log('user_login_2fa', 'User logged in with 2FA', (int)$user['id'], $request->ip());
+                $this->redirect('/user/dashboard');
+            }
+
+            // Check backup code
+            $hashedBackup = json_decode((string)($user['two_factor_backup_codes'] ?? '[]'), true) ?? [];
+            $backupIndex  = $totp->verifyBackupCode($code, $hashedBackup);
+            if ($backupIndex >= 0) {
+                array_splice($hashedBackup, $backupIndex, 1);
+                $userModel->update((int)$user['id'], [
+                    'two_factor_backup_codes' => json_encode(array_values($hashedBackup)),
+                ]);
+                $this->session->remove('pending_2fa_user_id');
+                Auth::login($user, 'user');
+                (new AuditLog())->log('user_login_backup_code', 'User logged in using 2FA backup code', (int)$user['id'], $request->ip());
+                $this->redirect('/user/dashboard');
+            }
+
+            $this->flash('error', 'Invalid authentication code. Please try again.');
+            $this->redirect('/login/2fa');
+        }
+
+        $this->view('auth/2fa', ['title' => 'Two-Factor Verification']);
     }
 
     public function logout(Request $request): void

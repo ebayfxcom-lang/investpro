@@ -9,6 +9,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\AuditLog;
 use App\Models\WithdrawalModel;
+use App\Models\WithdrawalMethodModel;
 use App\Models\WalletModel;
 use App\Models\TransactionModel;
 use App\Models\SettingsModel;
@@ -24,7 +25,9 @@ class WithdrawalController extends Controller
 
         $walletModel   = new WalletModel();
         $settingsModel = new SettingsModel();
-        $wallets = $walletModel->getUserWallets($userId);
+        $methodModel   = new WithdrawalMethodModel();
+        $wallets       = $walletModel->getUserWallets($userId);
+        $methods       = $methodModel->getActiveMethods();
 
         if ($request->isPost()) {
             if (!Csrf::validateRequest($request)) {
@@ -32,28 +35,54 @@ class WithdrawalController extends Controller
                 $this->redirect('/user/withdraw');
             }
 
+            $methodId = (int)$request->post('method_id', 0);
             $amount   = (float)$request->post('amount', 0);
-            $currency = strtoupper($request->post('currency', 'USD'));
             $address  = trim($request->post('address', ''));
-            $method   = $request->post('method', 'bank');
+            $memo     = trim($request->post('memo', ''));
 
-            $minWithdraw = (float)($settingsModel->get('min_withdrawal', 10));
+            // Validate method
+            $method = $methodModel->find($methodId);
+            if (!$method || $method['status'] !== 'active') {
+                $this->flash('error', 'Invalid withdrawal method selected.');
+                $this->redirect('/user/withdraw');
+            }
+
+            $currency  = $method['currency'];
+            $network   = $method['network'];
+            $minAmount = (float)$method['min_amount'];
+
+            $minWithdraw = max($minAmount, (float)($settingsModel->get('min_withdrawal', 10)));
             $maxWithdraw = (float)($settingsModel->get('max_withdrawal', 100000));
 
-            if ($amount < $minWithdraw || $amount > $maxWithdraw) {
-                $this->flash('error', "Withdrawal amount must be between {$minWithdraw} and {$maxWithdraw}.");
+            if ($amount < $minWithdraw) {
+                $this->flash('error', "Minimum withdrawal for this method is {$minWithdraw} {$currency}.");
+                $this->redirect('/user/withdraw');
+            }
+            if ($maxWithdraw > 0 && $amount > $maxWithdraw) {
+                $this->flash('error', "Maximum withdrawal is {$maxWithdraw}.");
                 $this->redirect('/user/withdraw');
             }
             if (empty($address)) {
-                $this->flash('error', 'Withdrawal address/account is required.');
+                $this->flash('error', 'Withdrawal address is required.');
+                $this->redirect('/user/withdraw');
+            }
+
+            // Validate address format if regex provided
+            if (!empty($method['address_regex']) && !preg_match('/' . $method['address_regex'] . '/', $address)) {
+                $this->flash('error', 'Invalid withdrawal address format for the selected network.');
                 $this->redirect('/user/withdraw');
             }
 
             $balance = $walletModel->getBalance($userId, $currency);
             if ($balance < $amount) {
-                $this->flash('error', 'Insufficient balance.');
+                $this->flash('error', "Insufficient {$currency} balance. Available: {$balance}");
                 $this->redirect('/user/withdraw');
             }
+
+            // Calculate fee and actual crypto amount
+            $fee       = (float)$method['fee'];
+            $feeAmount = $fee + ($amount * (float)$method['fee_percent'] / 100);
+            $netAmount = $amount - $feeAmount;
 
             $walletModel->debit($userId, $currency, $amount);
 
@@ -63,22 +92,26 @@ class WithdrawalController extends Controller
 
             $withdrawalModel = new WithdrawalModel();
             $wId = $withdrawalModel->create([
-                'user_id'       => $userId,
-                'amount'        => $amount,
-                'currency'      => $currency,
-                'method'        => $method,
-                'address'       => $address,
-                'status'        => 'pending',
-                'created_at'    => date('Y-m-d H:i:s'),
-                'usd_amount'    => $snapshot['usd_amount'],
-                'eur_amount'    => $snapshot['eur_amount'],
-                'rate_snapshot' => $snapshot['rate_snapshot'],
+                'user_id'             => $userId,
+                'amount'              => $amount,
+                'fee'                 => $feeAmount,
+                'currency'            => $currency,
+                'network'             => $network,
+                'method'              => $method['name'],
+                'address'             => $address,
+                'memo'                => $memo ?: null,
+                'actual_crypto_amount'=> $netAmount,
+                'status'              => 'pending',
+                'created_at'          => date('Y-m-d H:i:s'),
+                'usd_amount'          => $snapshot['usd_amount'],
+                'eur_amount'          => $snapshot['eur_amount'],
+                'rate_snapshot'       => $snapshot['rate_snapshot'],
             ]);
 
             $transModel = new TransactionModel();
             $transModel->addTransaction($userId, 'withdrawal', $amount, $currency, 'Withdrawal request', 'pending', (int)$wId);
 
-            (new AuditLog())->log('withdrawal_requested', "Withdrawal of {$amount} {$currency} requested", $userId, $request->ip());
+            (new AuditLog())->log('withdrawal_requested', "Withdrawal of {$amount} {$currency} via {$method['name']} requested", $userId, $request->ip());
             $this->flash('success', 'Withdrawal request submitted. Pending admin approval.');
             $this->redirect('/user/withdrawals');
         }
@@ -86,6 +119,7 @@ class WithdrawalController extends Controller
         $this->view('user/withdrawal/create', [
             'title'   => 'Withdraw Funds',
             'wallets' => $wallets,
+            'methods' => $methods,
         ]);
     }
 

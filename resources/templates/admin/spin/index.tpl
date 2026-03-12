@@ -57,9 +57,9 @@
         <h6 class="mb-0 fw-bold"><i class="fas fa-sliders me-2 text-warning"></i>Spin Settings</h6>
       </div>
       <div class="card-body">
-        <form method="POST" action="/admin/spin/settings">
+        <form method="POST" action="/admin/spin">
           <input type="hidden" name="_csrf_token" value="{$csrf_token}">
-          <input type="hidden" name="action" value="settings">
+          <input type="hidden" name="action" value="update_settings">
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Spin Wheel Status</label>
@@ -191,6 +191,37 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Grant Spins to User -->
+<div class="card mb-4">
+  <div class="card-header bg-white py-3">
+    <h6 class="mb-0 fw-bold"><i class="fas fa-hand-holding-heart me-2 text-primary"></i>Manually Grant Spins to User</h6>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="/admin/spin" class="row g-3 align-items-end">
+      <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+      <input type="hidden" name="action" value="grant_spins">
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Target User ID</label>
+        <input type="number" name="target_user_id" class="form-control" required min="1" placeholder="User ID">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Spin Count</label>
+        <input type="number" name="spin_count" class="form-control" value="1" min="1" max="1000">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-semibold">Type</label>
+        <select name="spin_type" class="form-select">
+          <option value="free">Free Spins</option>
+          <option value="paid">Paid Spins</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Grant</button>
+      </div>
+    </form>
   </div>
 </div>
 

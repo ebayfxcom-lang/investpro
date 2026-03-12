@@ -27,7 +27,10 @@ class SettingsController extends Controller
                         'min_deposit','max_deposit','min_withdrawal','max_withdrawal',
                         'withdrawal_fee','maintenance_mode','maintenance_message',
                         'registration_enabled','email_verification','two_factor_enabled',
-                        'add_funds_enabled','direct_crypto_enabled'];
+                        'add_funds_enabled','direct_crypto_enabled',
+                        'kyc_enabled','community_enabled','rewards_hub_enabled',
+                        'deposit_qr_enabled','auto_credit_enabled','min_deposit_confirmations',
+                        'dark_mode_default','site_theme'];
             $data = [];
             foreach ($allowed as $key) {
                 $val = $request->post($key);

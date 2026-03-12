@@ -13,6 +13,8 @@ $router = new Router();
 $router->get('/', [User\AuthController::class, 'login']);
 $router->get('/login', [User\AuthController::class, 'login']);
 $router->post('/login', [User\AuthController::class, 'login']);
+$router->get('/login/2fa', [User\AuthController::class, 'verifyTwoFactor']);
+$router->post('/login/2fa', [User\AuthController::class, 'verifyTwoFactor']);
 $router->get('/register', [User\AuthController::class, 'register']);
 $router->post('/register', [User\AuthController::class, 'register']);
 $router->get('/logout', [User\AuthController::class, 'logout']);
@@ -44,6 +46,20 @@ $router->get('/user/referrals', [User\ReferralController::class, 'index']);
 // Security
 $router->get('/user/security', [User\SecurityController::class, 'index']);
 $router->post('/user/security', [User\SecurityController::class, 'index']);
+
+// KYC
+$router->get('/user/kyc', [User\KycController::class, 'index']);
+$router->post('/user/kyc', [User\KycController::class, 'index']);
+
+// Community
+$router->get('/user/community', [User\CommunityController::class, 'index']);
+$router->post('/user/community/post', [User\CommunityController::class, 'create']);
+$router->post('/user/community/like', [User\CommunityController::class, 'like']);
+$router->post('/user/community/comment', [User\CommunityController::class, 'comment']);
+
+// Rewards Hub
+$router->get('/user/rewards', [User\RewardsController::class, 'index']);
+$router->post('/user/rewards/claim', [User\RewardsController::class, 'claim']);
 
 // Settings
 $router->get('/user/settings', [User\SettingsController::class, 'index']);
@@ -90,6 +106,7 @@ $router->post('/admin/deposits/{id}/reject', [Admin\DepositsController::class, '
 
 // Withdrawals
 $router->get('/admin/withdrawals', [Admin\WithdrawalsController::class, 'index']);
+$router->get('/admin/withdrawals/{id}', [Admin\WithdrawalsController::class, 'show']);
 $router->post('/admin/withdrawals/{id}/approve', [Admin\WithdrawalsController::class, 'approve']);
 $router->post('/admin/withdrawals/{id}/reject', [Admin\WithdrawalsController::class, 'reject']);
 
@@ -163,6 +180,26 @@ $router->post('/admin/exchange-rates', [Admin\ExchangeRatesController::class, 'i
 $router->get('/admin/spin', [Admin\SpinController::class, 'index']);
 $router->post('/admin/spin', [Admin\SpinController::class, 'index']);
 $router->get('/admin/spin/history', [Admin\SpinController::class, 'history']);
+
+// KYC
+$router->get('/admin/kyc', [Admin\KycController::class, 'index']);
+$router->get('/admin/kyc/{id}', [Admin\KycController::class, 'show']);
+$router->post('/admin/kyc/{id}/approve', [Admin\KycController::class, 'approve']);
+$router->post('/admin/kyc/{id}/reject', [Admin\KycController::class, 'reject']);
+
+// Community
+$router->get('/admin/community', [Admin\CommunityController::class, 'index']);
+$router->post('/admin/community/{id}/delete', [Admin\CommunityController::class, 'deletePost']);
+$router->get('/admin/community/bots', [Admin\CommunityController::class, 'bots']);
+$router->post('/admin/community/bots', [Admin\CommunityController::class, 'bots']);
+
+// Rewards Hub
+$router->get('/admin/rewards', [Admin\RewardsController::class, 'index']);
+$router->post('/admin/rewards', [Admin\RewardsController::class, 'index']);
+
+// Withdrawal Methods
+$router->get('/admin/withdrawal-methods', [Admin\WithdrawalMethodsController::class, 'index']);
+$router->post('/admin/withdrawal-methods', [Admin\WithdrawalMethodsController::class, 'index']);
 
 // Scam Reports (admin)
 $router->get('/admin/scam-reports', [Admin\ScamReportsController::class, 'index']);
