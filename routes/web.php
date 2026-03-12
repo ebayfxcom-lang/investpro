@@ -5,12 +5,23 @@ use App\Core\Router;
 use App\Controllers\Admin;
 use App\Controllers\User;
 
+use App\Controllers\HomeController;
+
 $router = new Router();
+
+// ============================================================
+// PUBLIC FRONTEND ROUTES
+// ============================================================
+$router->get('/', [HomeController::class, 'index']);
+$router->get('/about', [HomeController::class, 'about']);
+$router->get('/faq', [HomeController::class, 'faq']);
+$router->get('/plans', [HomeController::class, 'plans']);
+$router->get('/news', [HomeController::class, 'news']);
+$router->get('/contact', [HomeController::class, 'contact']);
 
 // ============================================================
 // PUBLIC ROUTES
 // ============================================================
-$router->get('/', [User\AuthController::class, 'login']);
 $router->get('/login', [User\AuthController::class, 'login']);
 $router->post('/login', [User\AuthController::class, 'login']);
 $router->get('/login/2fa', [User\AuthController::class, 'verifyTwoFactor']);
