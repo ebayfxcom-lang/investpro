@@ -3,7 +3,7 @@
 
 {* Stats row *}
 <div class="row g-3 mb-4">
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     <div class="stat-card">
       <div class="d-flex justify-content-between align-items-start">
         <div>
@@ -14,7 +14,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     <div class="stat-card">
       <div class="d-flex justify-content-between align-items-start">
         <div>
@@ -25,7 +25,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-4">
+  <div class="col-sm-3">
     <div class="stat-card">
       <div class="d-flex justify-content-between align-items-start">
         <div>
@@ -33,6 +33,17 @@
           <div class="h4 fw-bold mb-0">{$stats.drafts}</div>
         </div>
         <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-edit"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="text-muted small mb-1">Guest Subscribers</div>
+          <div class="h4 fw-bold mb-0">{$stats.subscribers}</div>
+        </div>
+        <div class="stat-icon bg-info bg-opacity-10 text-info"><i class="fas fa-users"></i></div>
       </div>
     </div>
   </div>
@@ -149,10 +160,13 @@
             <input type="text" name="sender_name" class="form-control" placeholder="e.g. Support Team">
             <div class="form-text">Optional. Displayed in the newsletter list as who sent this.</div>
           </div>
-          <div class="mb-3">
+        <div class="mb-3">
             <label class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
             <textarea name="content" class="form-control" rows="8" required
                       placeholder="Write your newsletter content here. HTML is supported."></textarea>
+            <div class="form-text">
+              Available placeholders: <code>{literal}{{name}}{/literal}</code> (username), <code>{literal}{{email}}{/literal}</code>, <code>{literal}{{site_name}}{/literal}</code>, <code>{literal}{{site_url}}{/literal}</code>, <code>{literal}{{unsubscribe_url}}{/literal}</code>
+            </div>
           </div>
           <div>
             <label class="form-label fw-semibold">Recipients</label>
@@ -191,6 +205,9 @@
           <div class="mb-3">
             <label class="form-label fw-semibold">Content</label>
             <textarea name="content" id="editNlContent" class="form-control" rows="8" required></textarea>
+            <div class="form-text">
+              Available placeholders: <code>{literal}{{name}}{/literal}</code>, <code>{literal}{{email}}{/literal}</code>, <code>{literal}{{site_name}}{/literal}</code>, <code>{literal}{{site_url}}{/literal}</code>, <code>{literal}{{unsubscribe_url}}{/literal}</code>
+            </div>
           </div>
           <div>
             <label class="form-label fw-semibold">Recipients</label>

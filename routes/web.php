@@ -147,6 +147,11 @@ $router->post('/admin/news', [Admin\NewsController::class, 'index']);
 $router->get('/admin/pages', [Admin\PagesController::class, 'index']);
 $router->post('/admin/pages', [Admin\PagesController::class, 'index']);
 
+// Newsletter (public)
+$router->get('/newsletter/subscribe', [App\Controllers\NewsletterController::class, 'subscribe']);
+$router->post('/newsletter/subscribe', [App\Controllers\NewsletterController::class, 'subscribe']);
+$router->get('/newsletter/unsubscribe', [App\Controllers\NewsletterController::class, 'unsubscribe']);
+
 // Newsletter
 $router->get('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
 $router->post('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
