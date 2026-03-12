@@ -16,14 +16,14 @@
     <div class="table-responsive">
       <table class="table table-hover mb-0">
         <thead class="table-light">
-          <tr><th>#</th><th>User ID</th><th>Plan</th><th>Amount</th><th>Currency</th><th>Status</th><th>Expires</th><th>Created</th><th>Actions</th></tr>
+          <tr><th>#</th><th>User</th><th>Plan</th><th>Amount</th><th>Currency</th><th>Status</th><th>Expires</th><th>Created</th><th>Actions</th></tr>
         </thead>
         <tbody>
           {foreach $data.items as $d}
           <tr>
             <td class="text-muted small">{$d.id}</td>
-            <td><a href="/admin/users/{$d.user_id}" class="text-primary">#U{$d.user_id}</a></td>
-            <td>Plan #{$d.plan_id}</td>
+            <td><a href="/admin/users/{$d.user_id}" class="text-primary">{if $d.username}{$d.username|escape}{else}#{$d.user_id}{/if}</a></td>
+            <td>{if $d.plan_name}{$d.plan_name|escape}{else}Plan #{$d.plan_id}{/if}</td>
             <td><strong>${$d.amount|string_format:"%.2f"}</strong></td>
             <td>{$d.currency}</td>
             <td><span class="badge badge-status-{$d.status}">{$d.status|ucfirst}</span></td>

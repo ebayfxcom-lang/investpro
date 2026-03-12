@@ -45,6 +45,33 @@ class DepositModel extends Model
         ];
     }
 
+    public function paginateWithUsers(int $page, int $perPage = 20, string $extraWhere = '', array $params = []): array
+    {
+        $where = $extraWhere ? "WHERE {$extraWhere}" : '';
+        $total = (int)($this->db->fetchOne(
+            "SELECT COUNT(*) as cnt FROM deposits d LEFT JOIN users u ON d.user_id = u.id {$where}",
+            $params
+        )['cnt'] ?? 0);
+        $offset = ($page - 1) * $perPage;
+        $items  = $this->db->fetchAll(
+            "SELECT d.*, u.username, p.name as plan_name
+             FROM deposits d
+             LEFT JOIN users u ON d.user_id = u.id
+             LEFT JOIN plans p ON d.plan_id = p.id
+             {$where}
+             ORDER BY d.id DESC
+             LIMIT {$perPage} OFFSET {$offset}",
+            $params
+        );
+        return [
+            'items'       => $items,
+            'total'       => $total,
+            'page'        => $page,
+            'per_page'    => $perPage,
+            'total_pages' => (int)ceil($total / $perPage),
+        ];
+    }
+
     public function getTotalDepositsByUser(int $userId): float
     {
         $row = $this->db->fetchOne("SELECT COALESCE(SUM(amount),0) as total FROM deposits WHERE user_id = ? AND status != 'cancelled'", [$userId]);

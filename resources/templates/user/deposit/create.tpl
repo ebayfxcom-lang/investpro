@@ -4,7 +4,7 @@
 <div class="row g-4 mb-4">
   {foreach $plans as $plan}
   <div class="col-md-6 col-lg-3">
-    <div class="card h-100 border-0 shadow-sm plan-card" style="cursor:pointer;transition:transform .2s;" onclick="selectPlan({$plan.id}, {$plan.min_amount}, {$plan.max_amount}, '{$plan.currency}')">
+    <div class="card h-100 border-0 shadow-sm plan-card" style="cursor:pointer;transition:transform .2s;" onclick="selectPlan({$plan.id}, {$plan.min_amount}, {$plan.max_amount}, '{$plan.currency}', event)">
       <div class="card-body text-center">
         <div class="fw-bold fs-5 mb-2">{$plan.name|escape}</div>
         <div class="display-6 text-primary fw-bold">{$plan.roi_percent}%</div>
@@ -60,27 +60,31 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Currency <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Payment Coin <span class="text-danger">*</span></label>
             <select name="currency" id="currency" class="form-select" required>
-              <option value="USD">USD - US Dollar</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="BTC">BTC - Bitcoin</option>
-              <option value="ETH">ETH - Ethereum</option>
-              <option value="USDT">USDT - Tether</option>
+              {if $system_wallets}
+                {foreach $system_wallets as $sw}
+                <option value="{$sw.currency_code|escape}">{$sw.currency_code|escape}{if $sw.network} ({$sw.network|escape}){/if}</option>
+                {/foreach}
+              {else}
+                <option value="BTC">BTC - Bitcoin</option>
+                <option value="ETH">ETH - Ethereum</option>
+                <option value="USDT">USDT - Tether</option>
+              {/if}
             </select>
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Amount <span class="text-danger">*</span></label>
             <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="10" placeholder="0.00" required>
+              <span class="input-group-text" id="currencyLabel">$</span>
+              <input type="number" name="amount" id="amount" class="form-control" step="0.00000001" min="0" placeholder="0.00000000" required>
             </div>
             <div class="form-text" id="amountHint">Select a plan to see limits</div>
           </div>
 
           <button type="submit" class="btn btn-primary w-100">
-            <i class="fas fa-check-circle me-2"></i>Confirm Deposit
+            <i class="fas fa-arrow-right me-2"></i>Continue to Payment
           </button>
         </form>
       </div>
@@ -89,23 +93,23 @@
 </div>
 
 <script>
-function selectPlan(id, min, max, currency) {
+function selectPlan(id, min, max, currency, evt) {
   document.getElementById('plan_id').value = id;
   document.getElementById('amount').min = min;
-  let hint = 'Min: $' + parseFloat(min).toFixed(2);
-  if (max > 0) hint += ' | Max: $' + parseFloat(max).toFixed(2);
+  let hint = 'Min: ' + parseFloat(min).toFixed(8);
+  if (max > 0) hint += ' | Max: ' + parseFloat(max).toFixed(8);
   document.getElementById('amountHint').textContent = hint;
   document.querySelectorAll('.plan-card').forEach(c => { c.style.transform = ''; c.classList.remove('border-primary'); });
-  event.currentTarget.style.transform = 'translateY(-4px)';
-  event.currentTarget.classList.add('border-primary');
+  evt.currentTarget.style.transform = 'translateY(-4px)';
+  evt.currentTarget.classList.add('border-primary');
 }
 document.getElementById('plan_id').addEventListener('change', function() {
   const sel = this.options[this.selectedIndex];
   if (sel.value) {
     const min = sel.dataset.min, max = sel.dataset.max;
     document.getElementById('amount').min = min;
-    let hint = 'Min: $' + parseFloat(min).toFixed(2);
-    if (max > 0) hint += ' | Max: $' + parseFloat(max).toFixed(2);
+    let hint = 'Min: ' + parseFloat(min).toFixed(8);
+    if (max > 0) hint += ' | Max: ' + parseFloat(max).toFixed(8);
     document.getElementById('amountHint').textContent = hint;
   }
 });

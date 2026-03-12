@@ -25,6 +25,8 @@ $router->get('/user/dashboard', [User\DashboardController::class, 'index']);
 // Deposits
 $router->get('/user/deposit', [User\DepositController::class, 'create']);
 $router->post('/user/deposit', [User\DepositController::class, 'create']);
+$router->get('/user/deposit/pay', [User\DepositController::class, 'pay']);
+$router->post('/user/deposit/pay', [User\DepositController::class, 'pay']);
 $router->get('/user/deposits/active', [User\DepositController::class, 'active']);
 $router->get('/user/deposits/history', [User\DepositController::class, 'history']);
 
@@ -59,7 +61,7 @@ $router->get('/admin/dashboard', [Admin\DashboardController::class, 'index']);
 // Users
 $router->get('/admin/users', [Admin\UsersController::class, 'index']);
 $router->get('/admin/users/add-funds', [Admin\AddFundsController::class, 'index']);
-$router->get('/admin/users/{id}', [Admin\UsersController::class, 'view']);
+$router->get('/admin/users/{id}', [Admin\UsersController::class, 'show']);
 $router->post('/admin/users/{id}/toggle-status', [Admin\UsersController::class, 'toggleStatus']);
 $router->get('/admin/users/{id}/add-funds', [Admin\UsersController::class, 'addFunds']);
 $router->post('/admin/users/{id}/add-funds', [Admin\UsersController::class, 'addFunds']);
@@ -71,6 +73,14 @@ $router->post('/admin/plans/create', [Admin\PlansController::class, 'create']);
 $router->get('/admin/plans/{id}/edit', [Admin\PlansController::class, 'edit']);
 $router->post('/admin/plans/{id}/edit', [Admin\PlansController::class, 'edit']);
 $router->post('/admin/plans/{id}/delete', [Admin\PlansController::class, 'delete']);
+
+// Deposit Wallets (System Wallets)
+$router->get('/admin/deposit-wallets', [Admin\DepositWalletsController::class, 'index']);
+$router->get('/admin/deposit-wallets/create', [Admin\DepositWalletsController::class, 'create']);
+$router->post('/admin/deposit-wallets/create', [Admin\DepositWalletsController::class, 'create']);
+$router->get('/admin/deposit-wallets/{id}/edit', [Admin\DepositWalletsController::class, 'edit']);
+$router->post('/admin/deposit-wallets/{id}/edit', [Admin\DepositWalletsController::class, 'edit']);
+$router->post('/admin/deposit-wallets/{id}/delete', [Admin\DepositWalletsController::class, 'delete']);
 
 // Deposits
 $router->get('/admin/deposits', [Admin\DepositsController::class, 'index']);
@@ -157,7 +167,7 @@ $router->get('/admin/spin/history', [Admin\SpinController::class, 'history']);
 // Scam Reports (admin)
 $router->get('/admin/scam-reports', [Admin\ScamReportsController::class, 'index']);
 $router->post('/admin/scam-reports', [Admin\ScamReportsController::class, 'index']);
-$router->get('/admin/scam-reports/{id}', [Admin\ScamReportsController::class, 'view']);
+$router->get('/admin/scam-reports/{id}', [Admin\ScamReportsController::class, 'show']);
 
 // User Spin
 $router->get('/user/spin', [User\SpinController::class, 'index']);

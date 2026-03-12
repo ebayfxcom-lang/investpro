@@ -46,6 +46,7 @@
     <div class="nav-section">Investments</div>
     <a class="nav-link" href="/admin/plans"><i class="fas fa-layer-group"></i> Plans</a>
     <a class="nav-link" href="/admin/deposits"><i class="fas fa-arrow-down-to-bracket"></i> Deposits</a>
+    <a class="nav-link" href="/admin/deposit-wallets"><i class="fas fa-wallet"></i> System Wallets</a>
     <a class="nav-link" href="/admin/deposits/expiring"><i class="fas fa-clock"></i> Expiring Deposits</a>
     <a class="nav-link" href="/admin/withdrawals"><i class="fas fa-money-bill-transfer"></i> Withdrawals</a>
     <a class="nav-link" href="/admin/transactions"><i class="fas fa-list-alt"></i> Transactions</a>

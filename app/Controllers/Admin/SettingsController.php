@@ -26,7 +26,8 @@ class SettingsController extends Controller
             $allowed = ['site_name','site_email','site_url','currency','referral_percent',
                         'min_deposit','max_deposit','min_withdrawal','max_withdrawal',
                         'withdrawal_fee','maintenance_mode','maintenance_message',
-                        'registration_enabled','email_verification','two_factor_enabled'];
+                        'registration_enabled','email_verification','two_factor_enabled',
+                        'add_funds_enabled','direct_crypto_enabled'];
             $data = [];
             foreach ($allowed as $key) {
                 $val = $request->post($key);

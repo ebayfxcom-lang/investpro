@@ -72,6 +72,22 @@
               <label class="form-label fw-semibold">Maintenance Message</label>
               <textarea name="maintenance_message" class="form-control" rows="2">{$settings.maintenance_message|escape}</textarea>
             </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Manual Add Funds (Admin)</label>
+              <select name="add_funds_enabled" class="form-select">
+                <option value="1" {if $settings.add_funds_enabled|default:1}selected{/if}>Enabled</option>
+                <option value="0" {if !($settings.add_funds_enabled|default:1)}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Allow admins to manually credit user accounts.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Direct Crypto Deposits</label>
+              <select name="direct_crypto_enabled" class="form-select">
+                <option value="1" {if $settings.direct_crypto_enabled|default:1}selected{/if}>Enabled</option>
+                <option value="0" {if !($settings.direct_crypto_enabled|default:1)}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Allow users to deposit via crypto address.</div>
+            </div>
           </div>
           <div class="mt-4">
             <button type="submit" class="btn btn-accent"><i class="fas fa-save me-2"></i>Save Settings</button>

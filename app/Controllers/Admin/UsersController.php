@@ -39,7 +39,7 @@ class UsersController extends Controller
         ]);
     }
 
-    public function view(Request $request, array $params): void
+    public function show(Request $request, array $params): void
     {
         $this->requireAuth('admin');
         $userModel    = new UserModel();
