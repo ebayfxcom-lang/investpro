@@ -42,7 +42,7 @@
           <!-- QR Code -->
           {if $qr_code_url}
           <div class="col-md-4 text-center">
-            <img src="{$qr_code_url}" alt="Wallet QR Code" class="img-fluid border rounded p-1" style="max-width:160px">
+            <div id="deposit-qr-container" class="d-flex justify-content-center my-2" data-qr="{$qr_code_url|escape}"></div>
             <div class="text-muted small mt-1">Scan to send</div>
           </div>
           {/if}
@@ -171,5 +171,20 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2500);
 }
+(function() {
+  var container = document.getElementById('deposit-qr-container');
+  if (container && typeof QRCode !== 'undefined') {
+    new QRCode(container, {
+      text: container.getAttribute('data-qr'),
+      width: 160,
+      height: 160,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else if (container) {
+    container.innerHTML = '<p class="text-danger small">QR code unavailable.</p>';
+  }
+})();
 </script>
 {/block}
