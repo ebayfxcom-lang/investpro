@@ -201,30 +201,3 @@ document.getElementById('sidebarToggle')?.addEventListener('click', () => {
 </script>
 </body>
 </html>
-
-  <div class="page-content">
-    {if $flash.success}
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>{$flash.success}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {/if}
-    {if $flash.error}
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i>{$flash.error}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {/if}
-
-    {block name="content"}{/block}
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.getElementById('sidebarToggle')?.addEventListener('click', () => {
-  document.querySelector('.sidebar').classList.toggle('show');
-});
-</script>
-</body>
-</html>
