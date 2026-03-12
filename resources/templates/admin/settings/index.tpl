@@ -88,6 +88,47 @@
               </select>
               <div class="form-text">Allow users to deposit via crypto address.</div>
             </div>
+            <div class="col-12"><hr><h6 class="fw-bold text-muted">Feature Modules</h6></div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">KYC Verification</label>
+              <select name="kyc_enabled" class="form-select">
+                <option value="1" {if $settings.kyc_enabled}selected{/if}>Enabled</option>
+                <option value="0" {if !$settings.kyc_enabled}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Show KYC menu and allow submissions.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Community Square</label>
+              <select name="community_enabled" class="form-select">
+                <option value="1" {if $settings.community_enabled}selected{/if}>Enabled</option>
+                <option value="0" {if !$settings.community_enabled}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Show community feed to users.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Rewards Hub</label>
+              <select name="rewards_hub_enabled" class="form-select">
+                <option value="1" {if $settings.rewards_hub_enabled}selected{/if}>Enabled</option>
+                <option value="0" {if !$settings.rewards_hub_enabled}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Show rewards/offers hub to users.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Deposit QR Code</label>
+              <select name="deposit_qr_enabled" class="form-select">
+                <option value="1" {if $settings.deposit_qr_enabled|default:1}selected{/if}>Enabled</option>
+                <option value="0" {if !($settings.deposit_qr_enabled|default:1)}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Show QR code on deposit page.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Auto-Credit Deposits</label>
+              <select name="auto_credit_enabled" class="form-select">
+                <option value="1" {if $settings.auto_credit_enabled|default:1}selected{/if}>Enabled</option>
+                <option value="0" {if !($settings.auto_credit_enabled|default:1)}selected{/if}>Disabled</option>
+              </select>
+              <div class="form-text">Automatically credit deposits after blockchain confirmation.</div>
+            </div>
           </div>
           <div class="mt-4">
             <button type="submit" class="btn btn-accent"><i class="fas fa-save me-2"></i>Save Settings</button>

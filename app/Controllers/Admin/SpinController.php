@@ -42,6 +42,35 @@ class SpinController extends Controller
                 $this->redirect('/admin/spin');
             }
 
+            if ($action === 'grant_spins') {
+                $targetUserId = (int)$request->post('target_user_id', 0);
+                $spinCount    = max(1, (int)$request->post('spin_count', 1));
+                $spinType     = $request->post('spin_type', 'free');
+                if ($targetUserId > 0) {
+                    $userSpinModel = new \App\Models\UserSpinModel();
+                    $userSpinModel->getOrCreate($targetUserId);
+                    if ($spinType === 'paid') {
+                        $userSpinModel->addPaidSpins($targetUserId, $spinCount);
+                    } else {
+                        $this->grantFreeSpins($targetUserId, $spinCount);
+                    }
+                    // Log to spin_history with admin grant marker
+                    $historyModel->create([
+                        'user_id'          => $targetUserId,
+                        'reward_id'        => null,
+                        'spin_type'        => $spinType,
+                        'reward_type'      => 'spin_credits',
+                        'reward_value'     => $spinCount,
+                        'reward_label'     => "Admin grant: {$spinCount} {$spinType} spin(s)",
+                        'granted_by_admin' => Auth::id('admin'),
+                        'created_at'       => date('Y-m-d H:i:s'),
+                    ]);
+                    (new AuditLog())->log('spin_grant', "Admin granted {$spinCount} {$spinType} spin(s) to user #{$targetUserId}", Auth::id('admin'), $request->ip());
+                    $this->flash('success', "Granted {$spinCount} {$spinType} spin(s) to user #{$targetUserId}.");
+                }
+                $this->redirect('/admin/spin');
+            }
+
             if ($action === 'update_reward') {
                 $slotId = (int)$request->post('reward_id', 0);
                 if ($slotId > 0) {
@@ -72,6 +101,14 @@ class SpinController extends Controller
             'history'  => $history,
             'admin'    => Auth::user('admin'),
         ]);
+    }
+
+    private function grantFreeSpins(int $userId, int $count): void
+    {
+        \App\Core\Database::getInstance()->query(
+            "UPDATE user_spins SET free_spins = free_spins + ?, updated_at = NOW() WHERE user_id = ?",
+            [$count, $userId]
+        );
     }
 
     public function history(Request $request): void

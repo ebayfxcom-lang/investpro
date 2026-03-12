@@ -33,6 +33,23 @@ class WithdrawalsController extends Controller
         ]);
     }
 
+    public function show(Request $request, array $params): void
+    {
+        $this->requireAuth('admin');
+        $withdrawalModel = new WithdrawalModel();
+        $withdrawal = $withdrawalModel->find((int)$params['id']);
+        if (!$withdrawal) {
+            $this->flash('error', 'Withdrawal not found.');
+            $this->redirect('/admin/withdrawals');
+        }
+
+        $this->view('admin/withdrawals/show', [
+            'title'      => 'Withdrawal Details',
+            'withdrawal' => $withdrawal,
+            'admin'      => Auth::user('admin'),
+        ]);
+    }
+
     public function approve(Request $request, array $params): void
     {
         $this->requireAuth('admin');
@@ -43,11 +60,17 @@ class WithdrawalsController extends Controller
         $withdrawalModel = new WithdrawalModel();
         $withdrawal = $withdrawalModel->find((int)$params['id']);
         if ($withdrawal && $withdrawal['status'] === 'pending') {
+            $sentTxHash = trim($request->post('sent_tx_hash', ''));
+            $adminNote  = trim($request->post('admin_note', ''));
             $withdrawalModel->update((int)$params['id'], [
-                'status'     => 'approved',
-                'updated_at' => date('Y-m-d H:i:s'),
+                'status'       => 'approved',
+                'sent_tx_hash' => $sentTxHash ?: null,
+                'admin_note'   => $adminNote ?: null,
+                'processed_at' => date('Y-m-d H:i:s'),
+                'processed_by' => Auth::id('admin'),
+                'updated_at'   => date('Y-m-d H:i:s'),
             ]);
-            (new AuditLog())->log('withdrawal_approved', "Withdrawal #{$params['id']} approved", Auth::id('admin'), $request->ip());
+            (new AuditLog())->log('withdrawal_approved', "Withdrawal #{$params['id']} approved" . ($sentTxHash ? " TX: {$sentTxHash}" : ''), Auth::id('admin'), $request->ip());
             $this->flash('success', 'Withdrawal approved.');
         }
         $this->redirect('/admin/withdrawals');

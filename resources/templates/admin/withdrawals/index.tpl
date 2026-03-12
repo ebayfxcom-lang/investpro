@@ -27,8 +27,9 @@
             <td><span class="badge badge-status-{$w.status}">{$w.status|ucfirst}</span></td>
             <td class="small text-muted">{$w.created_at|date_format:'%b %d, %Y'}</td>
             <td>
-              {if $w.status == 'pending'}
               <div class="d-flex gap-1">
+                <a href="/admin/withdrawals/{$w.id}" class="btn btn-sm btn-outline-primary py-0 px-2">View</a>
+                {if $w.status == 'pending'}
                 <form method="POST" action="/admin/withdrawals/{$w.id}/approve" class="d-inline">
                   <input type="hidden" name="_csrf_token" value="{$csrf_token}">
                   <button type="submit" class="btn btn-sm btn-success py-0 px-2">Approve</button>
@@ -37,8 +38,8 @@
                   <input type="hidden" name="_csrf_token" value="{$csrf_token}">
                   <button type="submit" class="btn btn-sm btn-danger py-0 px-2" onclick="return confirm('Reject and refund?')">Reject</button>
                 </form>
+                {/if}
               </div>
-              {else}-{/if}
             </td>
           </tr>
           {foreachelse}

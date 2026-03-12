@@ -34,6 +34,18 @@ abstract class Controller
         $smarty->assign('csrf_token', Csrf::getToken());
         $smarty->assign('flash', $this->session->getFlash());
 
+        // Feature flags for conditional sidebar/menu rendering
+        try {
+            $settingsModel = new \App\Models\SettingsModel();
+            $smarty->assign('settings_kyc_enabled',       (bool)$settingsModel->get('kyc_enabled', '0'));
+            $smarty->assign('settings_community_enabled', (bool)$settingsModel->get('community_enabled', '0'));
+            $smarty->assign('settings_rewards_enabled',   (bool)$settingsModel->get('rewards_hub_enabled', '0'));
+        } catch (\Throwable $e) {
+            $smarty->assign('settings_kyc_enabled',       false);
+            $smarty->assign('settings_community_enabled', false);
+            $smarty->assign('settings_rewards_enabled',   false);
+        }
+
         // Register custom modifiers not built into Smarty 5
         $smarty->registerPlugin('modifier', 'ucfirst', fn($s) => ucfirst((string)$s));
         $smarty->registerPlugin('modifier', 'ceil', fn($n) => (int)ceil((float)$n));
