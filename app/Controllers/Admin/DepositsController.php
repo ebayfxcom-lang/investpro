@@ -9,6 +9,8 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\AuditLog;
 use App\Models\DepositModel;
+use App\Models\PlanModel;
+use App\Models\TransactionModel;
 
 class DepositsController extends Controller
 {
@@ -19,10 +21,10 @@ class DepositsController extends Controller
         $page   = (int)($request->get('page', 1));
         $status = $request->get('status', '');
 
-        $where  = $status ? 'status = ?' : '';
+        $where  = $status ? 'd.status = ?' : '';
         $params = $status ? [$status] : [];
 
-        $data = $depositModel->paginate($page, 20, $where, $params);
+        $data = $depositModel->paginateWithUsers($page, 20, $where, $params);
 
         $this->view('admin/deposits/index', [
             'title'  => 'Deposits',
@@ -52,12 +54,40 @@ class DepositsController extends Controller
             $this->redirect('/admin/deposits');
         }
         $depositModel = new DepositModel();
+        $deposit = $depositModel->find((int)$params['id']);
+        if (!$deposit) {
+            $this->flash('error', 'Deposit not found.');
+            $this->redirect('/admin/deposits');
+        }
+
+        // Calculate expiry from plan duration
+        $planModel     = new PlanModel();
+        $plan          = $planModel->find((int)$deposit['plan_id']);
+        $durationValue = (int)($plan['duration_value'] ?? 0);
+        $durationUnit  = $plan['duration_unit'] ?? 'day';
+        if ($durationValue <= 0) {
+            $durationValue = (int)($plan['duration_days'] ?? 30);
+            $durationUnit  = 'day';
+        }
+        if ($durationValue <= 0) {
+            $durationValue = 30;
+        }
+        $unitMap   = ['hour' => 'hour', 'day' => 'day', 'week' => 'week', 'month' => 'month', 'year' => 'year'];
+        $phpUnit   = $unitMap[$durationUnit] ?? 'day';
+        $expiresAt = date('Y-m-d H:i:s', strtotime("+{$durationValue} {$phpUnit}"));
+
         $depositModel->update((int)$params['id'], [
             'status'     => 'active',
+            'expires_at' => $expiresAt,
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
+
+        // Mark the associated pending transaction as completed
+        $transModel = new TransactionModel();
+        $transModel->markDepositTransactionCompleted((int)$params['id']);
+
         (new AuditLog())->log('deposit_approved', "Deposit #{$params['id']} approved", Auth::id('admin'), $request->ip());
-        $this->flash('success', 'Deposit approved.');
+        $this->flash('success', 'Deposit approved and activated.');
         $this->redirect('/admin/deposits');
     }
 

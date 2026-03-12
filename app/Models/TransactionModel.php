@@ -31,6 +31,41 @@ class TransactionModel extends Model
         ]);
     }
 
+    public function paginateWithUsers(int $page, int $perPage = 20, string $extraWhere = '', array $params = []): array
+    {
+        $where = $extraWhere ? "WHERE {$extraWhere}" : '';
+        $total = (int)($this->db->fetchOne(
+            "SELECT COUNT(*) as cnt FROM transactions t LEFT JOIN users u ON t.user_id = u.id {$where}",
+            $params
+        )['cnt'] ?? 0);
+        $offset = ($page - 1) * $perPage;
+        $items  = $this->db->fetchAll(
+            "SELECT t.*, u.username
+             FROM transactions t
+             LEFT JOIN users u ON t.user_id = u.id
+             {$where}
+             ORDER BY t.id DESC
+             LIMIT {$perPage} OFFSET {$offset}",
+            $params
+        );
+        return [
+            'items'       => $items,
+            'total'       => $total,
+            'page'        => $page,
+            'per_page'    => $perPage,
+            'total_pages' => (int)ceil($total / $perPage),
+        ];
+    }
+
+    public function markDepositTransactionCompleted(int $depositId): void
+    {
+        $this->db->update(
+            'transactions',
+            ['status' => 'completed'],
+            ['ref_id' => $depositId, 'type' => 'deposit', 'status' => 'pending']
+        );
+    }
+
     public function getStats(): array
     {
         return [

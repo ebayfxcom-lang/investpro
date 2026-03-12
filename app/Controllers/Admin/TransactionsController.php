@@ -17,10 +17,10 @@ class TransactionsController extends Controller
         $page   = (int)($request->get('page', 1));
         $type   = $request->get('type', '');
 
-        $where  = $type ? 'type = ?' : '';
+        $where  = $type ? 't.type = ?' : '';
         $params = $type ? [$type] : [];
 
-        $data = $transModel->paginate($page, 20, $where, $params);
+        $data = $transModel->paginateWithUsers($page, 20, $where, $params);
 
         $this->view('admin/transactions/index', [
             'title' => 'Transactions',

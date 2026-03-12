@@ -21,7 +21,7 @@
           {foreach $data.items as $t}
           <tr>
             <td class="text-muted small">{$t.id}</td>
-            <td><a href="/admin/users/{$t.user_id}" class="text-primary">#U{$t.user_id}</a></td>
+            <td><a href="/admin/users/{$t.user_id}" class="text-primary">{if $t.username}{$t.username|escape}{else}#{$t.user_id}{/if}</a></td>
             <td><span class="badge bg-secondary bg-opacity-25 text-dark small">{$t.type|replace:'_':' '|ucfirst}</span></td>
             <td><strong>{if $t.type == 'withdrawal'}-{/if}${$t.amount|string_format:"%.2f"}</strong></td>
             <td>{$t.currency}</td>
