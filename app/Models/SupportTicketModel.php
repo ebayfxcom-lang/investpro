@@ -53,7 +53,7 @@ class SupportTicketModel extends Model
         return $this->db->fetchAll($sql, [$ticketId]);
     }
 
-    public function addReply(int $ticketId, ?int $userId, string $body, bool $isStaff = false, bool $isInternal = false): string
+    public function addReply(int $ticketId, ?int $userId, string $body, bool $isStaff = false, bool $isInternal = false): int
     {
         $id = $this->db->insert('ticket_replies', [
             'ticket_id'        => $ticketId,
@@ -67,7 +67,7 @@ class SupportTicketModel extends Model
             "UPDATE support_tickets SET last_reply_at = NOW(), updated_at = NOW() WHERE id = ?",
             [$ticketId]
         );
-        return $id;
+        return (int)$id;
     }
 
     public function adminPaginate(int $page = 1, int $perPage = 25, string $status = '', int $deptId = 0): array
@@ -87,8 +87,8 @@ class SupportTicketModel extends Model
                      LEFT JOIN ticket_departments d ON d.id = t.department_id
                      LEFT JOIN users u ON u.id = t.user_id"
                   . ($whereStr ? " WHERE {$whereStr}" : '')
-                  . " ORDER BY t.created_at DESC LIMIT {$perPage} OFFSET {$offset}";
-        $items = $this->db->fetchAll($dataSql, $params);
+                  . " ORDER BY t.created_at DESC LIMIT ? OFFSET ?";
+        $items = $this->db->fetchAll($dataSql, array_merge($params, [$perPage, $offset]));
 
         return [
             'items'       => $items,

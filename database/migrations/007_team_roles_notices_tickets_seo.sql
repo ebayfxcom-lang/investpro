@@ -48,6 +48,10 @@ ALTER TABLE `users`
   ADD COLUMN IF NOT EXISTS `account_type`  ENUM('normal','representative','team_leader') NOT NULL DEFAULT 'normal' AFTER `team_role_id`,
   ADD COLUMN IF NOT EXISTS `preferred_currency` VARCHAR(10) NOT NULL DEFAULT 'USD' AFTER `account_type`;
 
+ALTER TABLE `users`
+  ADD CONSTRAINT IF NOT EXISTS `fk_users_team_role`
+    FOREIGN KEY (`team_role_id`) REFERENCES `team_roles` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
 -- ============================================================
 -- 5. USER NOTICES
 -- ============================================================
