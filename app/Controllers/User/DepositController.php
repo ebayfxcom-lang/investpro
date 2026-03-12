@@ -220,6 +220,7 @@ class DepositController extends Controller
 
     private function buildQrCodeUrl(string $data): string
     {
-        return 'https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=' . rawurlencode($data);
+        // Return the raw data; QR rendering is done client-side
+        return $data;
     }
 }

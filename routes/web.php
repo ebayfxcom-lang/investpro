@@ -5,12 +5,23 @@ use App\Core\Router;
 use App\Controllers\Admin;
 use App\Controllers\User;
 
+use App\Controllers\HomeController;
+
 $router = new Router();
+
+// ============================================================
+// PUBLIC FRONTEND ROUTES
+// ============================================================
+$router->get('/', [HomeController::class, 'index']);
+$router->get('/about', [HomeController::class, 'about']);
+$router->get('/faq', [HomeController::class, 'faq']);
+$router->get('/plans', [HomeController::class, 'plans']);
+$router->get('/news', [HomeController::class, 'news']);
+$router->get('/contact', [HomeController::class, 'contact']);
 
 // ============================================================
 // PUBLIC ROUTES
 // ============================================================
-$router->get('/', [User\AuthController::class, 'login']);
 $router->get('/login', [User\AuthController::class, 'login']);
 $router->post('/login', [User\AuthController::class, 'login']);
 $router->get('/login/2fa', [User\AuthController::class, 'verifyTwoFactor']);
@@ -147,6 +158,11 @@ $router->post('/admin/news', [Admin\NewsController::class, 'index']);
 $router->get('/admin/pages', [Admin\PagesController::class, 'index']);
 $router->post('/admin/pages', [Admin\PagesController::class, 'index']);
 
+// Newsletter (public)
+$router->get('/newsletter/subscribe', [App\Controllers\NewsletterController::class, 'subscribe']);
+$router->post('/newsletter/subscribe', [App\Controllers\NewsletterController::class, 'subscribe']);
+$router->get('/newsletter/unsubscribe', [App\Controllers\NewsletterController::class, 'unsubscribe']);
+
 // Newsletter
 $router->get('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
 $router->post('/admin/newsletter', [Admin\NewsletterController::class, 'index']);
@@ -213,5 +229,38 @@ $router->post('/user/spin', [User\SpinController::class, 'index']);
 // Scam report submission (public)
 $router->get('/report-scam', [User\ScamReportController::class, 'create']);
 $router->post('/report-scam', [User\ScamReportController::class, 'create']);
+
+// Notices
+$router->get('/admin/notices', [Admin\NoticesController::class, 'index']);
+$router->post('/admin/notices', [Admin\NoticesController::class, 'index']);
+
+// SEO/Meta Manager
+$router->get('/admin/seo', [Admin\SeoController::class, 'index']);
+$router->post('/admin/seo', [Admin\SeoController::class, 'index']);
+
+// Team Roles & Members
+$router->get('/admin/team', [Admin\TeamController::class, 'index']);
+$router->get('/admin/team/members', [Admin\TeamController::class, 'members']);
+$router->post('/admin/team/members', [Admin\TeamController::class, 'members']);
+$router->get('/admin/team/{id}/edit', [Admin\TeamController::class, 'editRole']);
+$router->post('/admin/team/{id}/edit', [Admin\TeamController::class, 'editRole']);
+
+// Support Tickets (Admin)
+$router->get('/admin/support', [Admin\SupportController::class, 'index']);
+$router->get('/admin/support/{id}', [Admin\SupportController::class, 'show']);
+$router->post('/admin/support/{id}', [Admin\SupportController::class, 'show']);
+
+// Support Tickets (User)
+$router->get('/user/support', [User\SupportController::class, 'index']);
+$router->get('/user/support/create', [User\SupportController::class, 'create']);
+$router->post('/user/support/create', [User\SupportController::class, 'create']);
+$router->get('/user/support/{id}', [User\SupportController::class, 'show']);
+$router->post('/user/support/{id}', [User\SupportController::class, 'show']);
+
+// Notices (mark read via AJAX)
+$router->post('/user/notices/read', [User\DashboardController::class, 'markNoticeRead']);
+
+// Quick Navigation
+$router->get('/admin/quick-nav', [Admin\QuickNavController::class, 'index']);
 
 return $router;

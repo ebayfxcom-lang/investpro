@@ -40,6 +40,15 @@
       <i class="fas fa-info-circle me-1 text-info"></i>
       Share your link and earn a commission on every deposit made by your referrals!
     </div>
+    <div class="mt-3">
+      <div class="text-muted small mb-2"><i class="fas fa-qrcode me-1"></i>Referral QR Code</div>
+      <div id="referral-qr" class="d-inline-block border rounded p-2 bg-white"></div>
+      <div class="mt-2">
+        <button class="btn btn-sm btn-outline-secondary" onclick="downloadReferralQR()">
+          <i class="fas fa-download me-1"></i>Download QR
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -110,6 +119,40 @@ function copyLink() {
     btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
     setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy me-1"></i>Copy'; }, 2000);
   });
+}
+(function() {
+  var container = document.getElementById('referral-qr');
+  var refLink = document.getElementById('refLink');
+  if (container && refLink && typeof QRCode !== 'undefined') {
+    new QRCode(container, {
+      text: refLink.value,
+      width: 160,
+      height: 160,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else if (container) {
+    container.innerHTML = '<p class="text-danger small">QR code unavailable.</p>';
+  }
+})();
+function downloadReferralQR() {
+  var container = document.getElementById('referral-qr');
+  if (!container) return;
+  var img = container.querySelector('img');
+  var canvas = container.querySelector('canvas');
+  var dataUrl;
+  if (canvas) {
+    dataUrl = canvas.toDataURL('image/png');
+  } else if (img) {
+    dataUrl = img.src;
+  } else {
+    return;
+  }
+  var a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'referral-qr.png';
+  a.click();
 }
 </script>
 {/block}

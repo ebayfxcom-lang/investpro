@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{$csrf_token}">
   <title>{$title|default:'Dashboard'} - {$app.name}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -108,6 +109,7 @@
     <a class="nav-link" href="/user/rewards"><i class="fas fa-gift"></i> Rewards Hub</a>
     {/if}
     <div class="nav-divider"></div>
+    <a class="nav-link" href="/user/support"><i class="fas fa-headset"></i> Support</a>
     <a class="nav-link" href="/user/security"><i class="fas fa-shield-halved"></i> Security</a>
     <a class="nav-link" href="/user/settings"><i class="fas fa-user-cog"></i> Settings</a>
     <a class="nav-link" style="color:rgba(255,80,80,.8)" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -149,6 +151,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 (function() {

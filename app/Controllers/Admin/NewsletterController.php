@@ -96,9 +96,10 @@ class NewsletterController extends Controller
         $page  = (int)($request->get('page', 1));
         $data  = $newsletterModel->paginate($page, 20, '', [], 'created_at DESC');
         $stats = [
-            'total'  => $newsletterModel->count(),
-            'sent'   => $newsletterModel->count("status = 'sent'"),
-            'drafts' => $newsletterModel->count("status = 'draft'"),
+            'total'       => $newsletterModel->count(),
+            'sent'        => $newsletterModel->count("status = 'sent'"),
+            'drafts'      => $newsletterModel->count("status = 'draft'"),
+            'subscribers' => (new \App\Models\NewsletterGuestModel())->count("status = 'subscribed'"),
         ];
 
         $this->view('admin/newsletter/index', [

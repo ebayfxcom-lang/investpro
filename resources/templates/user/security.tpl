@@ -74,7 +74,7 @@
             then enter the 6-digit code below to confirm.
           </p>
           <div class="text-center mb-3">
-            <img src="{$totp_qr_url}" alt="QR Code" class="img-fluid border rounded" style="max-width:200px">
+            <div id="totp-qr-container" class="d-flex justify-content-center"></div>
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold small">Manual entry key</label>
@@ -154,4 +154,24 @@
 
   </div>
 </div>
+
+{if $totp_qr_url}
+<script>
+(function() {
+  var container = document.getElementById('totp-qr-container');
+  if (container && typeof QRCode !== 'undefined') {
+    new QRCode(container, {
+      text: '{$totp_qr_url|escape:'javascript'}',
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else if (container) {
+    container.innerHTML = '<p class="text-danger small">QR code could not be loaded. Please use the manual key below.</p>';
+  }
+})();
+</script>
+{/if}
 {/block}

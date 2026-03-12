@@ -56,6 +56,27 @@ abstract class Controller
         $smarty->registerPlugin('modifier', 'abs', fn($n) => abs((float)$n));
         $smarty->registerPlugin('modifier', 'strtotime', fn($s) => strtotime((string)$s));
 
+        // Override built-in date_format to safely handle NULL/empty dates and
+        // convert strftime-style format strings (%Y, %m, …) to date() patterns.
+        // This ensures PHP 8.3 compatibility without relying on deprecated strftime().
+        $smarty->registerPlugin('modifier', 'date_format', static function ($date, string $format = '%b %e, %Y'): string {
+            if ($date === null || $date === '' || $date === false) {
+                return '';
+            }
+            $ts = is_numeric($date) ? (int)$date : strtotime((string)$date);
+            if ($ts === false || $ts === 0) {
+                return '';
+            }
+            static $strftimeMap = [
+                '%Y' => 'Y', '%y' => 'y', '%m' => 'm', '%d' => 'd', '%e' => 'j',
+                '%H' => 'H', '%I' => 'h', '%M' => 'i', '%S' => 's', '%A' => 'l',
+                '%a' => 'D', '%B' => 'F', '%b' => 'M', '%p' => 'A', '%P' => 'a',
+                '%j' => 'z', '%Z' => 'T', '%z' => 'O', '%n' => "\n", '%t' => "\t",
+            ];
+            $phpFormat = str_replace(array_keys($strftimeMap), array_values($strftimeMap), $format);
+            return date($phpFormat, $ts);
+        });
+
         return $smarty;
     }
 

@@ -2,13 +2,15 @@
 {block name="content"}
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <div class="card">
-      <div class="card-header bg-white py-3">
-        <h6 class="mb-0 fw-bold"><i class="fas fa-layer-group me-2 text-primary"></i>{if $plan}Edit Plan: {$plan.name|escape}{else}Create New Plan{/if}</h6>
-      </div>
-      <div class="card-body">
-        <form method="POST" action="{if $plan}/admin/plans/{$plan.id}/edit{else}/admin/plans/create{/if}">
-          <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+    <form method="POST" action="{if $plan}/admin/plans/{$plan.id}/edit{else}/admin/plans/create{/if}">
+      <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+
+      {* Main plan details card *}
+      <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="fas fa-layer-group me-2 text-primary"></i>{if $plan}Edit Plan: {$plan.name|escape}{else}Create New Plan{/if}</h6>
+        </div>
+        <div class="card-body">
           <div class="row g-3">
             <div class="col-md-8">
               <label class="form-label fw-semibold">Plan Name <span class="text-danger">*</span></label>
@@ -77,13 +79,61 @@
               </select>
             </div>
           </div>
-          <div class="d-flex gap-2 mt-4">
-            <button type="submit" class="btn btn-accent"><i class="fas fa-save me-2"></i>{if $plan}Update Plan{else}Create Plan{/if}</button>
-            <a href="/admin/plans" class="btn btn-outline-secondary">Cancel</a>
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
+
+      {* Conditional Prerequisites card *}
+      {if $all_plans}
+      <div class="card mb-4">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0 fw-bold"><i class="fas fa-lock me-2 text-warning"></i>Conditional Prerequisites <span class="text-muted fw-normal small">(optional)</span></h6>
+        </div>
+        <div class="card-body">
+          <p class="text-muted small mb-3">Restrict this plan to users who have already invested in specific plans. Leave all fields empty / zero to disable prerequisites.</p>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Required Prerequisite Plans</label>
+              {assign var="prereq_ids" value=($plan.requires_plan_ids) ? $plan.requires_plan_ids|json_decode:true : []}
+              <select name="requires_plan_ids[]" class="form-select" multiple
+                      size="{if $all_plans|@count > 6}6{else}{$all_plans|@count}{/if}">
+                {foreach $all_plans as $p}
+                <option value="{$p.id}" {if $prereq_ids && in_array($p.id, $prereq_ids)}selected{/if}>
+                  #{$p.id} — {$p.name|escape} ({$p.status})
+                </option>
+                {/foreach}
+              </select>
+              <div class="form-text">Hold Ctrl/Cmd to select multiple. Users must have deposited in at least one selected plan.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Min. Deposits Count</label>
+              <input type="number" name="prereq_min_deposits" class="form-control"
+                     value="{$plan.prereq_min_deposits|default:0}" min="0" placeholder="0 = any">
+              <div class="form-text">Min. deposits required in prerequisite plans.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Min. Total Amount ($)</label>
+              <input type="number" name="prereq_min_amount" class="form-control" step="0.01"
+                     value="{$plan.prereq_min_amount|default:0}" min="0" placeholder="0 = any">
+              <div class="form-text">Min. total invested in prerequisite plans.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Required Deposit Status</label>
+              <select name="prereq_deposit_status" class="form-select">
+                <option value="any"       {if ($plan.prereq_deposit_status|default:'any') == 'any'}selected{/if}>Any status</option>
+                <option value="active"    {if $plan.prereq_deposit_status == 'active'}selected{/if}>Active only</option>
+                <option value="completed" {if $plan.prereq_deposit_status == 'completed'}selected{/if}>Completed only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/if}
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-accent"><i class="fas fa-save me-2"></i>{if $plan}Update Plan{else}Create Plan{/if}</button>
+        <a href="/admin/plans" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
   </div>
 </div>
 {/block}

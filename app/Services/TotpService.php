@@ -69,12 +69,11 @@ class TotpService
     }
 
     /**
-     * Generate a QR code URL using the Google Charts API (no API key needed).
+     * Return the provisioning URI directly for client-side QR rendering.
      */
     public function getQrCodeUrl(string $provisioningUri): string
     {
-        return 'https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl='
-            . rawurlencode($provisioningUri);
+        return $provisioningUri;
     }
 
     /**
