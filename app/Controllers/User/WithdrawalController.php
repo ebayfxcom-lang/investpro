@@ -84,32 +84,44 @@ class WithdrawalController extends Controller
             $feeAmount = $fee + ($amount * (float)$method['fee_percent'] / 100);
             $netAmount = $amount - $feeAmount;
 
-            $walletModel->debit($userId, $currency, $amount);
-
-            // Build conversion snapshot
+            // Build conversion snapshot before debiting funds
             $conversionService = new ConversionService();
             $snapshot = $conversionService->buildSnapshot($amount, $currency);
 
-            $withdrawalModel = new WithdrawalModel();
-            $wId = $withdrawalModel->create([
-                'user_id'             => $userId,
-                'amount'              => $amount,
-                'fee'                 => $feeAmount,
-                'currency'            => $currency,
-                'network'             => $network,
-                'method'              => $method['name'],
-                'address'             => $address,
-                'memo'                => $memo ?: null,
-                'actual_crypto_amount'=> $netAmount,
-                'status'              => 'pending',
-                'created_at'          => date('Y-m-d H:i:s'),
-                'usd_amount'          => $snapshot['usd_amount'],
-                'eur_amount'          => $snapshot['eur_amount'],
-                'rate_snapshot'       => $snapshot['rate_snapshot'],
-            ]);
+            // Use a database transaction so a debit is never left without a withdrawal record
+            $db = \App\Core\Database::getInstance();
+            $db->beginTransaction();
+            try {
+                $walletModel->debit($userId, $currency, $amount);
 
-            $transModel = new TransactionModel();
-            $transModel->addTransaction($userId, 'withdrawal', $amount, $currency, 'Withdrawal request', 'pending', (int)$wId);
+                $withdrawalModel = new WithdrawalModel();
+                $wId = $withdrawalModel->create([
+                    'user_id'             => $userId,
+                    'amount'              => $amount,
+                    'fee'                 => $feeAmount,
+                    'currency'            => $currency,
+                    'network'             => $network,
+                    'method'              => $method['name'],
+                    'address'             => $address,
+                    'memo'                => $memo ?: null,
+                    'actual_crypto_amount'=> $netAmount,
+                    'status'              => 'pending',
+                    'created_at'          => date('Y-m-d H:i:s'),
+                    'usd_amount'          => $snapshot['usd_amount'],
+                    'eur_amount'          => $snapshot['eur_amount'],
+                    'rate_snapshot'       => $snapshot['rate_snapshot'],
+                ]);
+
+                $transModel = new TransactionModel();
+                $transModel->addTransaction($userId, 'withdrawal', $amount, $currency, 'Withdrawal request', 'pending', (int)$wId);
+
+                $db->commit();
+            } catch (\Throwable $e) {
+                $db->rollBack();
+                error_log('Withdrawal submit error for user ' . $userId . ': ' . $e->getMessage());
+                $this->flash('error', 'Could not submit withdrawal request. Please try again.');
+                $this->redirect('/user/withdraw');
+            }
 
             (new AuditLog())->log('withdrawal_requested', "Withdrawal of {$amount} {$currency} via {$method['name']} requested", $userId, $request->ip());
             $this->flash('success', 'Withdrawal request submitted. Pending admin approval.');

@@ -61,13 +61,13 @@ CREATE TABLE IF NOT EXISTS `withdrawal_methods` (
   KEY `idx_wm_currency` (`currency`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Seed default withdrawal methods
+-- Seed default withdrawal methods (status = 'inactive' so admins must explicitly enable each one)
 INSERT IGNORE INTO `withdrawal_methods` (`id`, `name`, `currency`, `network`, `min_amount`, `fee`, `fee_percent`, `status`, `sort_order`) VALUES
-(1, 'Bitcoin (BTC)',         'BTC',  'BTC',   0.0001,  0.00002000, 0.00, 'active', 1),
-(2, 'Ethereum (ERC20)',      'ETH',  'ERC20', 0.01,    0.00050000, 0.00, 'active', 2),
-(3, 'USDT (TRC20)',          'USDT', 'TRC20', 10.00,   1.00000000, 0.00, 'active', 3),
-(4, 'USDT (ERC20)',          'USDT', 'ERC20', 20.00,   5.00000000, 0.00, 'active', 4),
-(5, 'BNB (BEP20)',           'BNB',  'BEP20', 0.1,     0.00050000, 0.00, 'active', 5);
+(1, 'Bitcoin (BTC)',         'BTC',  'BTC',   0.0001,  0.00002000, 0.00, 'inactive', 1),
+(2, 'Ethereum (ERC20)',      'ETH',  'ERC20', 0.01,    0.00050000, 0.00, 'inactive', 2),
+(3, 'USDT (TRC20)',          'USDT', 'TRC20', 10.00,   1.00000000, 0.00, 'inactive', 3),
+(4, 'USDT (ERC20)',          'USDT', 'ERC20', 20.00,   5.00000000, 0.00, 'inactive', 4),
+(5, 'BNB (BEP20)',           'BNB',  'BEP20', 0.1,     0.00050000, 0.00, 'inactive', 5);
 
 -- ============================================================
 -- 4. USERS: 2FA backup codes column
