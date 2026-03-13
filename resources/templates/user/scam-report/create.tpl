@@ -36,7 +36,7 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">When did it happen?</label>
-                <input type="date" name="scam_date" class="form-control" max="{'' | date_format:'%Y-%m-%d'}">
+                <input type="date" name="scam_date" class="form-control" max="{$smarty.now|to_input_date}">
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Your Name <span class="text-muted small">(optional)</span></label>

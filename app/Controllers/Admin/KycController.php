@@ -34,7 +34,11 @@ class KycController extends Controller
         $this->requireAuth('admin');
 
         $kycModel = new KycModel();
-        $kyc      = $kycModel->find((int)$params['id']);
+        try {
+            $kyc = $kycModel->find((int)$params['id']);
+        } catch (\Throwable) {
+            $kyc = null;
+        }
         if (!$kyc) {
             $this->flash('error', 'KYC submission not found.');
             $this->redirect('/admin/kyc');
@@ -56,16 +60,21 @@ class KycController extends Controller
         }
 
         $kycModel = new KycModel();
-        $kyc      = $kycModel->find((int)$params['id']);
-        if ($kyc) {
-            $kycModel->update((int)$params['id'], [
-                'status'      => 'approved',
-                'review_note' => trim($request->post('review_note', '')),
-                'reviewed_by' => Auth::id('admin'),
-                'reviewed_at' => date('Y-m-d H:i:s'),
-            ]);
-            (new AuditLog())->log('kyc_approved', "KYC #{$params['id']} approved", Auth::id('admin'), $request->ip());
-            $this->flash('success', 'KYC submission approved.');
+        try {
+            $kyc = $kycModel->find((int)$params['id']);
+            if ($kyc) {
+                $kycModel->update((int)$params['id'], [
+                    'status'      => 'approved',
+                    'review_note' => trim($request->post('review_note', '')),
+                    'reviewed_by' => Auth::id('admin'),
+                    'reviewed_at' => date('Y-m-d H:i:s'),
+                ]);
+                (new AuditLog())->log('kyc_approved', "KYC #{$params['id']} approved", Auth::id('admin'), $request->ip());
+                $this->flash('success', 'KYC submission approved.');
+            }
+        } catch (\Throwable $e) {
+            error_log('KycController approve error: ' . $e->getMessage());
+            $this->flash('error', 'Could not update KYC status.');
         }
         $this->redirect('/admin/kyc');
     }
@@ -79,16 +88,21 @@ class KycController extends Controller
         }
 
         $kycModel = new KycModel();
-        $kyc      = $kycModel->find((int)$params['id']);
-        if ($kyc) {
-            $kycModel->update((int)$params['id'], [
-                'status'      => 'rejected',
-                'review_note' => trim($request->post('review_note', '')),
-                'reviewed_by' => Auth::id('admin'),
-                'reviewed_at' => date('Y-m-d H:i:s'),
-            ]);
-            (new AuditLog())->log('kyc_rejected', "KYC #{$params['id']} rejected", Auth::id('admin'), $request->ip());
-            $this->flash('success', 'KYC submission rejected.');
+        try {
+            $kyc = $kycModel->find((int)$params['id']);
+            if ($kyc) {
+                $kycModel->update((int)$params['id'], [
+                    'status'      => 'rejected',
+                    'review_note' => trim($request->post('review_note', '')),
+                    'reviewed_by' => Auth::id('admin'),
+                    'reviewed_at' => date('Y-m-d H:i:s'),
+                ]);
+                (new AuditLog())->log('kyc_rejected', "KYC #{$params['id']} rejected", Auth::id('admin'), $request->ip());
+                $this->flash('success', 'KYC submission rejected.');
+            }
+        } catch (\Throwable $e) {
+            error_log('KycController reject error: ' . $e->getMessage());
+            $this->flash('error', 'Could not update KYC status.');
         }
         $this->redirect('/admin/kyc');
     }

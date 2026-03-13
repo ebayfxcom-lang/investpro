@@ -46,15 +46,19 @@ class RewardOfferModel extends Model
 
     public function adminPaginate(int $page = 1, int $perPage = 20): array
     {
-        $total  = $this->count();
-        $offset = ($page - 1) * $perPage;
-        $items  = $this->findAll('', [], 'sort_order ASC, id DESC', $perPage, $offset);
-        return [
-            'items'       => $items,
-            'total'       => $total,
-            'page'        => $page,
-            'per_page'    => $perPage,
-            'total_pages' => (int)ceil($total / $perPage),
-        ];
+        try {
+            $total  = $this->count();
+            $offset = ($page - 1) * $perPage;
+            $items  = $this->findAll('', [], 'sort_order ASC, id DESC', $perPage, $offset);
+            return [
+                'items'       => $items,
+                'total'       => $total,
+                'page'        => $page,
+                'per_page'    => $perPage,
+                'total_pages' => (int)ceil($total / $perPage),
+            ];
+        } catch (\Throwable) {
+            return ['items' => [], 'total' => 0, 'page' => $page, 'per_page' => $perPage, 'total_pages' => 0];
+        }
     }
 }

@@ -9,9 +9,22 @@ class SeoPageModel extends Model
 {
     protected string $table = 'seo_pages';
 
+    public function getAllPages(): array
+    {
+        try {
+            return $this->findAll('', [], 'page_key ASC');
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
     public function getByKey(string $key): ?array
     {
-        return $this->findBy(['page_key' => $key]);
+        try {
+            return $this->findBy(['page_key' => $key]);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public function upsert(string $key, array $data): void
@@ -23,10 +36,5 @@ class SeoPageModel extends Model
             $data['page_key'] = $key;
             $this->create($data);
         }
-    }
-
-    public function getAllPages(): array
-    {
-        return $this->findAll('', [], 'page_key ASC');
     }
 }
