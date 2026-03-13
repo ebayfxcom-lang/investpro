@@ -73,6 +73,7 @@
 {/if}
 
 <script>
+{literal}
 const csrfToken = document.querySelector('#postForm [name="_csrf_token"]').value;
 
 // Character counter
@@ -119,5 +120,5 @@ document.querySelectorAll('.like-btn').forEach(btn => {
     }
   });
 });
+{/literal}
 </script>
-{/block}

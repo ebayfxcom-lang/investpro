@@ -13,6 +13,7 @@
   {/foreach}
 </div>
 <script>
+{literal}
 function markNoticeRead(id) {
   fetch('/user/notices/read', {
     method: 'POST',
@@ -20,6 +21,7 @@ function markNoticeRead(id) {
     body: '_csrf_token=' + encodeURIComponent(document.querySelector('meta[name="csrf-token"]')?.content || '') + '&notice_id=' + id
   });
 }
+{/literal}
 </script>
 {/if}
 

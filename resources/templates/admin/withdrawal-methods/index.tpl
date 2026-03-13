@@ -40,7 +40,7 @@
           </div>
           <div class="mb-2">
             <label class="form-label fw-semibold small">Address Regex (optional)</label>
-            <input type="text" name="address_regex" class="form-control form-control-sm" placeholder="^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$">
+            <input type="text" name="address_regex" class="form-control form-control-sm" placeholder="^[13][a-km-zA-HJ-NP-Z1-9]{ldelim}25,34{rdelim}$">
           </div>
           <div class="mb-2">
             <div class="form-check">

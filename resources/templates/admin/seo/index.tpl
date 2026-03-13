@@ -52,7 +52,7 @@
           </div>
           <div class="mb-2">
             <label class="form-label fw-semibold small">Schema JSON-LD</label>
-            <textarea name="schema_json" id="f_schema_json" class="form-control form-control-sm" rows="3" placeholder='{"@context":"https://schema.org",...}'></textarea>
+            <textarea name="schema_json" id="f_schema_json" class="form-control form-control-sm" rows="3" placeholder="e.g. schema.org JSON-LD object"></textarea>
           </div>
           <div class="mb-2">
             <label class="form-label fw-semibold small">Admin Guide Text</label>
@@ -99,7 +99,8 @@
   </div>
 </div>
 <script>
-const pagesData = {$pages|json_encode};
+var pagesData = {$pages|json_encode};
+{literal}
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.js-seo-edit');
   if (!btn) return;
@@ -125,5 +126,5 @@ function loadPage(key) {
   var p = pagesData.find(function(x){ return x.page_key === key; });
   if (p) fillForm(p);
 }
+{/literal}
 </script>
-{/block}
