@@ -36,9 +36,11 @@ class CommunityController extends Controller
         }
         unset($post);
 
+        $authUser = Auth::user('user');
         $this->view('user/community/index', [
-            'title' => 'Community Square',
-            'feed'  => $feed,
+            'title'    => 'Community Square',
+            'feed'     => $feed,
+            'authUser' => $authUser,
         ]);
     }
 

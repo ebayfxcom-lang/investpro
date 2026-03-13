@@ -106,7 +106,7 @@ class BotService
                 $kw = $keywords[array_rand($keywords)];
                 // Only append if it makes the sentence more natural
                 if (strlen($content) + strlen($kw) < 200) {
-                    $content .= ' #' . preg_replace('/\s+/', '', $kw);
+                    $content .= ' #' . str_replace(' ', '', $kw);
                 }
             }
 

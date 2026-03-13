@@ -87,7 +87,17 @@ class SupportController extends Controller
 
             if ($action === 'assign_dept') {
                 $deptId = $request->post('department_id', '');
-                $model->update((int)$params['id'], ['department_id' => $deptId ? (int)$deptId : null]);
+                $validDept = null;
+                if ($deptId) {
+                    $depts = $this->getDepartments();
+                    foreach ($depts as $d) {
+                        if ((int)$d['id'] === (int)$deptId) {
+                            $validDept = (int)$deptId;
+                            break;
+                        }
+                    }
+                }
+                $model->update((int)$params['id'], ['department_id' => $validDept]);
                 (new AuditLog())->log('ticket_dept_assigned', "Ticket #{$params['id']} department updated", Auth::id('admin'), $request->ip());
                 $this->flash('success', 'Department assigned.');
                 $this->redirect('/admin/support/' . $params['id']);

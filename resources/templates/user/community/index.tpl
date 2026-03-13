@@ -101,6 +101,7 @@
 {/if}
 
 <script>
+var currentUserInitial = '{if $authUser}{$authUser.username|upper|truncate:1:'':''}'{else}'?'{/if};
 {literal}
 const csrfToken = document.querySelector('#postForm [name="_csrf_token"]').value;
 
@@ -179,14 +180,14 @@ document.querySelectorAll('.comment-form').forEach(form => {
       const avatar = document.createElement('div');
       avatar.className = 'bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0';
       avatar.style.cssText = 'width:28px;height:28px;font-size:.7rem;font-weight:700';
-      avatar.textContent = 'You';
+      avatar.textContent = currentUserInitial;
       const bubble = document.createElement('div');
       bubble.className = 'bg-light rounded px-2 py-1 flex-grow-1';
       bubble.style.cssText = 'background:rgba(255,255,255,.05)!important';
       const name = document.createElement('div');
       name.className = 'fw-semibold';
       name.style.fontSize = '.75rem';
-      name.textContent = 'You';
+      name.textContent = currentUserInitial;
       const text = document.createElement('div');
       text.style.fontSize = '.85rem';
       text.textContent = data.content || content;
