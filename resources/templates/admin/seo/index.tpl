@@ -99,7 +99,7 @@
   </div>
 </div>
 <script>
-var pagesData = {$pages|json_encode};
+const pagesData = {$pages|json_encode};
 {literal}
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('.js-seo-edit');
