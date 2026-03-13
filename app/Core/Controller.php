@@ -77,6 +77,32 @@ abstract class Controller
             return date($phpFormat, $ts);
         });
 
+        // Format a value for use in a native HTML <input type="date"> (YYYY-MM-DD).
+        // Accepts a datetime string, Unix timestamp, or null/empty.
+        $smarty->registerPlugin('modifier', 'to_input_date', static function ($date): string {
+            if ($date === null || $date === '' || $date === false) {
+                return '';
+            }
+            $ts = is_numeric($date) ? (int)$date : strtotime((string)$date);
+            if ($ts === false || $ts === 0) {
+                return '';
+            }
+            return date('Y-m-d', $ts);
+        });
+
+        // Format a value for use in a native HTML <input type="datetime-local"> (YYYY-MM-DDTHH:MM).
+        // Accepts a datetime string, Unix timestamp, or null/empty.
+        $smarty->registerPlugin('modifier', 'to_input_datetime', static function ($date): string {
+            if ($date === null || $date === '' || $date === false) {
+                return '';
+            }
+            $ts = is_numeric($date) ? (int)$date : strtotime((string)$date);
+            if ($ts === false || $ts === 0) {
+                return '';
+            }
+            return date('Y-m-d\TH:i', $ts);
+        });
+
         return $smarty;
     }
 

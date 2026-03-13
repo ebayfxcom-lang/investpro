@@ -11,11 +11,19 @@ class WithdrawalMethodModel extends Model
 
     public function getActiveMethods(): array
     {
-        return $this->findAll("status = 'active'", [], 'sort_order ASC, id ASC');
+        try {
+            return $this->findAll("status = 'active'", [], 'sort_order ASC, id ASC');
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public function getAllMethods(): array
     {
-        return $this->findAll('', [], 'sort_order ASC, id ASC');
+        try {
+            return $this->findAll('', [], 'sort_order ASC, id ASC');
+        } catch (\Throwable) {
+            return [];
+        }
     }
 }

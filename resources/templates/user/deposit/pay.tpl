@@ -171,20 +171,27 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2500);
 }
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
   var container = document.getElementById('deposit-qr-container');
-  if (container && typeof QRCode !== 'undefined') {
-    new QRCode(container, {
-      text: container.getAttribute('data-qr'),
-      width: 160,
-      height: 160,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-  } else if (container) {
-    container.innerHTML = '<p class="text-danger small">QR code unavailable.</p>';
+  if (!container) return;
+  var qrData = container.getAttribute('data-qr');
+  if (!qrData) return;
+  if (typeof QRCode !== 'undefined') {
+    try {
+      new QRCode(container, {
+        text: qrData,
+        width: 160,
+        height: 160,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch(e) {
+      container.innerHTML = '<p class="text-danger small"><i class="fas fa-exclamation-triangle me-1"></i>QR code could not be rendered. Please copy the address manually.</p>';
+    }
+  } else {
+    container.innerHTML = '<p class="text-warning small"><i class="fas fa-exclamation-triangle me-1"></i>QR library unavailable. Please copy the address manually.</p>';
   }
-})();
+});
 </script>
 {/block}

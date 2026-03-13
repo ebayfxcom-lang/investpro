@@ -11,7 +11,11 @@ class KycModel extends Model
 
     public function getByUser(int $userId): ?array
     {
-        return $this->db->fetchOne("SELECT * FROM kyc_submissions WHERE user_id = ?", [$userId]);
+        try {
+            return $this->db->fetchOne("SELECT * FROM kyc_submissions WHERE user_id = ?", [$userId]);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public function upsert(int $userId, array $data): void
@@ -26,38 +30,46 @@ class KycModel extends Model
 
     public function getPending(): array
     {
-        return $this->db->fetchAll(
-            "SELECT k.*, u.username, u.email FROM kyc_submissions k
-             JOIN users u ON k.user_id = u.id
-             WHERE k.status = 'pending' ORDER BY k.created_at ASC"
-        );
+        try {
+            return $this->db->fetchAll(
+                "SELECT k.*, u.username, u.email FROM kyc_submissions k
+                 JOIN users u ON k.user_id = u.id
+                 WHERE k.status = 'pending' ORDER BY k.created_at ASC"
+            );
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public function paginate(int $page, int $perPage = 20, string $status = ''): array
     {
-        $where  = $status ? 'k.status = ?' : '';
-        $params = $status ? [$status] : [];
-        $whereClause = $where ? "WHERE {$where}" : '';
-        $total = (int)($this->db->fetchOne(
-            "SELECT COUNT(*) as cnt FROM kyc_submissions k {$whereClause}",
-            $params
-        )['cnt'] ?? 0);
-        $offset = ($page - 1) * $perPage;
-        $items  = $this->db->fetchAll(
-            "SELECT k.*, u.username, u.email
-             FROM kyc_submissions k
-             LEFT JOIN users u ON k.user_id = u.id
-             {$whereClause}
-             ORDER BY k.id DESC
-             LIMIT {$perPage} OFFSET {$offset}",
-            $params
-        );
-        return [
-            'items'       => $items,
-            'total'       => $total,
-            'page'        => $page,
-            'per_page'    => $perPage,
-            'total_pages' => (int)ceil($total / $perPage),
-        ];
+        try {
+            $where  = $status ? 'k.status = ?' : '';
+            $params = $status ? [$status] : [];
+            $whereClause = $where ? "WHERE {$where}" : '';
+            $total = (int)($this->db->fetchOne(
+                "SELECT COUNT(*) as cnt FROM kyc_submissions k {$whereClause}",
+                $params
+            )['cnt'] ?? 0);
+            $offset = ($page - 1) * $perPage;
+            $items  = $this->db->fetchAll(
+                "SELECT k.*, u.username, u.email
+                 FROM kyc_submissions k
+                 LEFT JOIN users u ON k.user_id = u.id
+                 {$whereClause}
+                 ORDER BY k.id DESC
+                 LIMIT {$perPage} OFFSET {$offset}",
+                $params
+            );
+            return [
+                'items'       => $items,
+                'total'       => $total,
+                'page'        => $page,
+                'per_page'    => $perPage,
+                'total_pages' => (int)ceil($total / $perPage),
+            ];
+        } catch (\Throwable) {
+            return ['items' => [], 'total' => 0, 'page' => $page, 'per_page' => $perPage, 'total_pages' => 0];
+        }
     }
 }

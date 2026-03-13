@@ -11,26 +11,30 @@ class CommunityPostModel extends Model
 
     public function getFeed(int $page = 1, int $perPage = 20): array
     {
-        $total  = (int)($this->db->fetchOne(
-            "SELECT COUNT(*) as cnt FROM community_posts WHERE status = 'active'"
-        )['cnt'] ?? 0);
-        $offset = ($page - 1) * $perPage;
-        $items  = $this->db->fetchAll(
-            "SELECT p.*, u.username,
-                    (SELECT COUNT(*) FROM community_comments c WHERE c.post_id = p.id AND c.status = 'active') AS comment_count
-             FROM community_posts p
-             LEFT JOIN users u ON p.user_id = u.id
-             WHERE p.status = 'active'
-             ORDER BY p.created_at DESC
-             LIMIT {$perPage} OFFSET {$offset}"
-        );
-        return [
-            'items'       => $items,
-            'total'       => $total,
-            'page'        => $page,
-            'per_page'    => $perPage,
-            'total_pages' => (int)ceil($total / $perPage),
-        ];
+        try {
+            $total  = (int)($this->db->fetchOne(
+                "SELECT COUNT(*) as cnt FROM community_posts WHERE status = 'active'"
+            )['cnt'] ?? 0);
+            $offset = ($page - 1) * $perPage;
+            $items  = $this->db->fetchAll(
+                "SELECT p.*, u.username,
+                        (SELECT COUNT(*) FROM community_comments c WHERE c.post_id = p.id AND c.status = 'active') AS comment_count
+                 FROM community_posts p
+                 LEFT JOIN users u ON p.user_id = u.id
+                 WHERE p.status = 'active'
+                 ORDER BY p.created_at DESC
+                 LIMIT {$perPage} OFFSET {$offset}"
+            );
+            return [
+                'items'       => $items,
+                'total'       => $total,
+                'page'        => $page,
+                'per_page'    => $perPage,
+                'total_pages' => (int)ceil($total / $perPage),
+            ];
+        } catch (\Throwable) {
+            return ['items' => [], 'total' => 0, 'page' => $page, 'per_page' => $perPage, 'total_pages' => 0];
+        }
     }
 
     public function getPostWithUser(int $postId): ?array

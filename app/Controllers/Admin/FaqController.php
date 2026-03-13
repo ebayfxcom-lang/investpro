@@ -34,15 +34,31 @@ class FaqController extends Controller
                     $this->flash('error', 'Question and answer are required.');
                     $this->redirect('/admin/faq');
                 }
-                $faqModel->create([
-                    'question'    => $question,
-                    'answer'      => $answer,
-                    'category'    => $request->post('category', 'general'),
-                    'category_id' => ((int)$request->post('category_id', 0)) ?: null,
-                    'sort_order'  => (int)$request->post('sort_order', 0),
-                    'status'      => $request->post('status', 'active'),
-                    'created_at'  => date('Y-m-d H:i:s'),
-                ]);
+                try {
+                    $faqModel->create([
+                        'question'    => $question,
+                        'answer'      => $answer,
+                        'category'    => $request->post('category', 'general'),
+                        'category_id' => ((int)$request->post('category_id', 0)) ?: null,
+                        'sort_order'  => (int)$request->post('sort_order', 0),
+                        'status'      => $request->post('status', 'active'),
+                        'created_at'  => date('Y-m-d H:i:s'),
+                    ]);
+                } catch (\Throwable $e) {
+                    error_log('FaqController create error: ' . $e->getMessage());
+                    // Retry without extended columns (pre-migration 004/005 schema)
+                    try {
+                        $faqModel->create([
+                            'question'   => $question,
+                            'answer'     => $answer,
+                            'sort_order' => (int)$request->post('sort_order', 0),
+                            'created_at' => date('Y-m-d H:i:s'),
+                        ]);
+                    } catch (\Throwable) {
+                        $this->flash('error', 'Could not create FAQ. Please run the latest database migration.');
+                        $this->redirect('/admin/faq');
+                    }
+                }
                 (new AuditLog())->log('faq_created', 'New FAQ item created', Auth::id('admin'), $request->ip());
                 $this->flash('success', 'FAQ item created.');
             }
@@ -50,16 +66,32 @@ class FaqController extends Controller
             if ($action === 'update') {
                 $id = (int)$request->post('faq_id', 0);
                 if ($id > 0) {
-                    $faqModel->update($id, [
-                        'question'    => trim($request->post('question', '')),
-                        'answer'      => trim($request->post('answer', '')),
-                        'category'    => $request->post('category', 'general'),
-                        'category_id' => ((int)$request->post('category_id', 0)) ?: null,
-                        'sort_order'  => (int)$request->post('sort_order', 0),
-                        'status'      => $request->post('status', 'active'),
-                        'updated_at'  => date('Y-m-d H:i:s'),
-                    ]);
-                    $this->flash('success', 'FAQ item updated.');
+                    try {
+                        $faqModel->update($id, [
+                            'question'    => trim($request->post('question', '')),
+                            'answer'      => trim($request->post('answer', '')),
+                            'category'    => $request->post('category', 'general'),
+                            'category_id' => ((int)$request->post('category_id', 0)) ?: null,
+                            'sort_order'  => (int)$request->post('sort_order', 0),
+                            'status'      => $request->post('status', 'active'),
+                            'updated_at'  => date('Y-m-d H:i:s'),
+                        ]);
+                        $this->flash('success', 'FAQ item updated.');
+                    } catch (\Throwable $e) {
+                        error_log('FaqController update error: ' . $e->getMessage());
+                        // Retry without extended columns (pre-migration 005 schema)
+                        try {
+                            $faqModel->update($id, [
+                                'question'   => trim($request->post('question', '')),
+                                'answer'     => trim($request->post('answer', '')),
+                                'sort_order' => (int)$request->post('sort_order', 0),
+                                'status'     => $request->post('status', 'active'),
+                            ]);
+                            $this->flash('success', 'FAQ item updated (partial - please run migration 009).');
+                        } catch (\Throwable) {
+                            $this->flash('error', 'Could not update FAQ. Please run the latest database migration.');
+                        }
+                    }
                 }
             }
 
