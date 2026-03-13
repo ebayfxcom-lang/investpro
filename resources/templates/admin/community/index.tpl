@@ -2,9 +2,14 @@
 {block name="content"}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h6 class="fw-bold mb-0">Community Feed</h6>
-  <a href="/admin/community/bots" class="btn btn-sm btn-outline-primary">
-    <i class="fas fa-robot me-1"></i>Manage Bots
-  </a>
+  <div class="d-flex gap-2">
+    <a href="/admin/community/keywords" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-ban me-1"></i>Keywords
+    </a>
+    <a href="/admin/community/bots" class="btn btn-sm btn-outline-primary">
+      <i class="fas fa-robot me-1"></i>Manage Bots
+    </a>
+  </div>
 </div>
 
 <div class="card">
@@ -38,6 +43,22 @@
             </td>
             <td class="small text-muted">{$post.created_at|date_format:'%b %d'}</td>
             <td>
+              {if $post.status === 'active' || $post.status === 'hidden'}
+              <form method="POST" action="/admin/community/{$post.id}/hide" class="d-inline">
+                <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+                <button type="submit" class="btn btn-sm btn-outline-warning me-1"
+                        title="{if $post.is_hidden}Unhide{else}Hide{/if}">
+                  <i class="fas {if $post.is_hidden}fa-eye{else}fa-eye-slash{/if}"></i>
+                </button>
+              </form>
+              <form method="POST" action="/admin/community/{$post.id}/feature" class="d-inline">
+                <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+                <button type="submit" class="btn btn-sm btn-outline-info me-1"
+                        title="{if $post.is_featured}Unfeature{else}Feature{/if}">
+                  <i class="fas fa-star{if !$post.is_featured}-half-alt{/if}"></i>
+                </button>
+              </form>
+              {/if}
               {if $post.status === 'active'}
               <form method="POST" action="/admin/community/{$post.id}/delete" class="d-inline">
                 <input type="hidden" name="_csrf_token" value="{$csrf_token}">

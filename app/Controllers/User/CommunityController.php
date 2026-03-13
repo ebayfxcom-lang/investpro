@@ -11,6 +11,7 @@ use App\Core\AuditLog;
 use App\Models\CommunityPostModel;
 use App\Models\CommunityCommentModel;
 use App\Models\CommunityLikeModel;
+use App\Models\RestrictedKeywordModel;
 use App\Models\SettingsModel;
 
 class CommunityController extends Controller
@@ -71,12 +72,15 @@ class CommunityController extends Controller
         // Basic profanity/spam filter
         $content = $this->sanitizeContent($content);
 
+        $keywordModel = new RestrictedKeywordModel();
+        $status = $keywordModel->containsRestricted($content) ? 'pending' : 'active';
+
         $postModel = new CommunityPostModel();
         $postId    = $postModel->create([
             'user_id'    => $userId,
             'content'    => $content,
             'is_bot'     => 0,
-            'status'     => 'active',
+            'status'     => $status,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
