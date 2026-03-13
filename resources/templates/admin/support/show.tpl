@@ -77,6 +77,20 @@
           </select>
           <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Update Status</button>
         </form>
+        {if isset($depts) && $depts}
+        <form method="POST" action="/admin/support/{$ticket.id}" class="mb-2">
+          <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+          <input type="hidden" name="action" value="assign_dept">
+          <label class="form-label fw-semibold small">Assign Department</label>
+          <select name="department_id" class="form-select form-select-sm mb-2">
+            <option value="">-- No Department --</option>
+            {foreach $depts as $d}
+            <option value="{$d.id}" {if $ticket.department_id == $d.id}selected{/if}>{$d.name|escape}</option>
+            {/foreach}
+          </select>
+          <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Assign Department</button>
+        </form>
+        {/if}
         <a href="/admin/support" class="btn btn-sm btn-outline-secondary w-100">← Back to Tickets</a>
       </div>
     </div>

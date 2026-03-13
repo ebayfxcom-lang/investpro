@@ -43,6 +43,16 @@ class SpinRewardModel extends Model
         );
     }
 
+    private function getActiveCurrencyCodes(): array
+    {
+        try {
+            $rows = $this->db->fetchAll("SELECT code FROM currencies WHERE status = 'active'");
+            return array_column($rows, 'code');
+        } catch (\Throwable $e) {
+            return ['USD', 'EUR', 'BTC', 'ETH', 'USDT'];
+        }
+    }
+
     public function spin(?string $spinMode = null): ?array
     {
         if ($spinMode === 'free') {
@@ -55,6 +65,21 @@ class SpinRewardModel extends Model
 
         if (empty($rewards)) {
             // No mode-specific rewards configured – signal caller to handle this case
+            return null;
+        }
+
+        // Filter out rewards whose type is not a recognised special type and not an active currency
+        $validSpecialTypes    = ['spin_credits', 'points', 'percent_bonus', 'no_reward', 'usd', 'eur', 'bonus'];
+        $activeCurrenciesUpper = $this->getActiveCurrencyCodes();
+        $rewards = array_values(array_filter($rewards, function (array $r) use ($validSpecialTypes, $activeCurrenciesUpper): bool {
+            $type = strtolower($r['reward_type'] ?? '');
+            if (in_array($type, $validSpecialTypes, true)) {
+                return true;
+            }
+            return in_array(strtoupper($type), $activeCurrenciesUpper, true);
+        }));
+
+        if (empty($rewards)) {
             return null;
         }
 
