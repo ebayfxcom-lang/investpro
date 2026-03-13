@@ -34,12 +34,12 @@ class DashboardController extends Controller
         $noticeModel     = new UserNoticeModel();
 
         $user            = $userModel->find($userId);
-        $wallets         = $walletModel->getUserWallets($userId);
-        $activeDeposits  = $depositModel->getActiveDeposits($userId);
-        $recentTrans     = $transModel->getUserTransactions($userId, 10);
-        $referralStats   = $referralModel->getReferralStats($userId);
-        $totalDeposited  = $depositModel->getTotalDepositsByUser($userId);
-        $totalEarnings   = $earningsModel->getTotalEarnings($userId);
+        try { $wallets        = $walletModel->getUserWallets($userId); } catch (\Throwable) { $wallets = []; }
+        try { $activeDeposits = $depositModel->getActiveDeposits($userId); } catch (\Throwable) { $activeDeposits = []; }
+        try { $recentTrans    = $transModel->getUserTransactions($userId, 10); } catch (\Throwable) { $recentTrans = []; }
+        try { $referralStats  = $referralModel->getReferralStats($userId); } catch (\Throwable) { $referralStats = ['total_referrals' => 0, 'total_earnings' => 0.0, 'pending' => 0.0]; }
+        try { $totalDeposited = $depositModel->getTotalDepositsByUser($userId); } catch (\Throwable) { $totalDeposited = 0.0; }
+        try { $totalEarnings  = $earningsModel->getTotalEarnings($userId); } catch (\Throwable) { $totalEarnings = 0.0; }
 
         $userHasDeposit  = !empty($activeDeposits);
         $notices         = $noticeModel->getActiveForUser($userId, $user['account_type'] ?? 'normal', $userHasDeposit);

@@ -113,20 +113,43 @@ class AuthController extends Controller
                 $referredBy = $referrer ? $referrer['id'] : null;
             }
 
-            $id = $userModel->create([
-                'username'           => $username,
-                'email'              => $email,
-                'password'           => $userModel->hashPassword($password),
-                'referral_code'      => $userModel->generateReferralCode(),
-                'referred_by'        => $referredBy,
-                'role'               => 'user',
-                'status'             => 'active',
-                'whatsapp_number'    => $whatsapp,
-                'facebook_url'       => $facebook ?: null,
-                'country'            => $country ?: null,
-                'preferred_currency' => in_array($preferred_currency, ['USD', 'EUR', 'BTC', 'ETH', 'USDT']) ? $preferred_currency : 'USD',
-                'created_at'         => date('Y-m-d H:i:s'),
-            ]);
+            try {
+                $id = $userModel->create([
+                    'username'           => $username,
+                    'email'              => $email,
+                    'password'           => $userModel->hashPassword($password),
+                    'referral_code'      => $userModel->generateReferralCode(),
+                    'referred_by'        => $referredBy,
+                    'role'               => 'user',
+                    'status'             => 'active',
+                    'whatsapp_number'    => $whatsapp,
+                    'facebook_url'       => $facebook ?: null,
+                    'country'            => $country ?: null,
+                    'preferred_currency' => in_array($preferred_currency, ['USD', 'EUR', 'BTC', 'ETH', 'USDT']) ? $preferred_currency : 'USD',
+                    'created_at'         => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Throwable $e) {
+                // Extended columns may be missing (schema not fully migrated on MySQL 8.0).
+                // Retry with only the core columns present since migration 001.
+                error_log('Registration full insert failed, retrying with core columns: ' . $e->getMessage());
+                try {
+                    $id = $userModel->create([
+                        'username'      => $username,
+                        'email'         => $email,
+                        'password'      => $userModel->hashPassword($password),
+                        'referral_code' => $userModel->generateReferralCode(),
+                        'referred_by'   => $referredBy,
+                        'role'          => 'user',
+                        'status'        => 'active',
+                        'country'       => $country ?: null,
+                        'created_at'    => date('Y-m-d H:i:s'),
+                    ]);
+                } catch (\Throwable $e2) {
+                    error_log('Registration core insert also failed: ' . $e2->getMessage());
+                    $this->flash('error', 'Registration failed due to a server error. Please contact support.');
+                    $this->redirect('/register');
+                }
+            }
 
             $user = $userModel->find((int)$id);
             Auth::login($user, 'user');
