@@ -87,7 +87,7 @@ class FaqController extends Controller
                                 'sort_order' => (int)$request->post('sort_order', 0),
                                 'status'     => $request->post('status', 'active'),
                             ]);
-                            $this->flash('success', 'FAQ item updated (partial – please run migration 009).');
+                            $this->flash('success', 'FAQ item updated (partial - please run migration 009).');
                         } catch (\Throwable) {
                             $this->flash('error', 'Could not update FAQ. Please run the latest database migration.');
                         }

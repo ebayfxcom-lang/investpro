@@ -154,9 +154,12 @@ ALTER TABLE `plans`
   ADD COLUMN IF NOT EXISTS `duration_value` INT UNSIGNED NOT NULL DEFAULT 30 AFTER `roi_period`,
   ADD COLUMN IF NOT EXISTS `duration_unit`  ENUM('hour','day','week','month','year') NOT NULL DEFAULT 'day' AFTER `duration_value`;
 
--- Back-fill duration_value from duration_days where still at default
+-- Back-fill duration_value from duration_days where still at default (duration_days always exists from migration 001)
 UPDATE `plans` SET `duration_value` = `duration_days`, `duration_unit` = 'day'
-  WHERE `duration_value` = 30 AND `duration_unit` = 'day' AND `duration_days` != 30;
+  WHERE `duration_value` = 30 AND `duration_unit` = 'day' AND `duration_days` != 30
+  AND EXISTS (SELECT 1 FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'plans' AND COLUMN_NAME = 'duration_days');
 
 -- ============================================================
 -- 10. KYC submissions table
