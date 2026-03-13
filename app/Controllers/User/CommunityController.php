@@ -29,6 +29,12 @@ class CommunityController extends Controller
         $postModel = new CommunityPostModel();
         $feed      = $postModel->getFeed($page, 20);
 
+        $commentModel = new CommunityCommentModel();
+        foreach ($feed['items'] as &$post) {
+            $post['comments'] = $commentModel->getByPost((int)$post['id']);
+        }
+        unset($post);
+
         $this->view('user/community/index', [
             'title' => 'Community Square',
             'feed'  => $feed,
@@ -129,7 +135,7 @@ class CommunityController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $this->json(['success' => true, 'comment_id' => $commentId]);
+        $this->json(['success' => true, 'comment_id' => $commentId, 'content' => $content]);
     }
 
     private function sanitizeContent(string $content): string
