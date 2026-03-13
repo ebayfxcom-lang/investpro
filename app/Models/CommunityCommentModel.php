@@ -11,12 +11,18 @@ class CommunityCommentModel extends Model
 
     public function getByPost(int $postId): array
     {
-        return $this->db->fetchAll(
-            "SELECT c.*, u.username FROM community_comments c
-             LEFT JOIN users u ON c.user_id = u.id
-             WHERE c.post_id = ? AND c.status = 'active'
-             ORDER BY c.created_at ASC",
-            [$postId]
-        );
+        try {
+            return $this->db->fetchAll(
+                "SELECT c.*, COALESCE(u.username, b.display_name, 'Bot') AS username
+                 FROM community_comments c
+                 LEFT JOIN users u ON c.user_id = u.id
+                 LEFT JOIN bot_profiles b ON c.bot_id = b.id
+                 WHERE c.post_id = ? AND c.status = 'active'
+                 ORDER BY c.created_at ASC",
+                [$postId]
+            );
+        } catch (\Throwable) {
+            return [];
+        }
     }
 }

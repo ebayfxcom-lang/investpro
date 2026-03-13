@@ -16,10 +16,13 @@
         <div class="text-muted small mt-2">Joined {$user.created_at|date_format:'%b %d, %Y'}</div>
       </div>
       <div class="card-footer bg-white border-top py-3">
-        <div class="d-flex gap-2 justify-content-center">
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
           <a href="/admin/users/{$user.id}/add-funds" class="btn btn-sm btn-accent">
             <i class="fas fa-plus me-1"></i>Add Funds
           </a>
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">
+            <i class="fas fa-edit me-1"></i>Edit
+          </button>
           <form method="POST" action="/admin/users/{$user.id}/toggle-status">
             <input type="hidden" name="_csrf_token" value="{$csrf_token}">
             <button type="submit" class="btn btn-sm btn-outline-{if $user.status == 'active'}danger{else}success{/if}" onclick="return confirm('Change status?')">
@@ -74,6 +77,60 @@
           </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Edit User Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/admin/users/{$user.id}/edit">
+        <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <input type="text" name="username" class="form-control form-control-sm"
+                   value="{$user.username|escape}" maxlength="50">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Email</label>
+            <input type="email" name="email" class="form-control form-control-sm"
+                   value="{$user.email|escape}" maxlength="200">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Phone</label>
+            <input type="text" name="phone" class="form-control form-control-sm"
+                   value="{$user.phone|default:''|escape}" maxlength="30">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Country</label>
+            <input type="text" name="country" class="form-control form-control-sm"
+                   value="{$user.country|default:''|escape}" maxlength="80">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Status</label>
+            <select name="status" class="form-select form-select-sm">
+              <option value="active" {if $user.status == 'active'}selected{/if}>Active</option>
+              <option value="banned" {if $user.status == 'banned'}selected{/if}>Banned</option>
+              <option value="inactive" {if $user.status == 'inactive'}selected{/if}>Inactive</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">New Password <span class="text-muted">(leave blank to keep current)</span></label>
+            <input type="password" name="new_password" class="form-control form-control-sm"
+                   minlength="8" placeholder="Minimum 8 characters">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

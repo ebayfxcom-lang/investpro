@@ -11,6 +11,7 @@
 {if $active_offers}
 <div class="row g-3 mb-4">
   {foreach $active_offers as $offer}
+  {assign var="elig" value=$offer.eligibility}
   <div class="col-md-6 col-lg-4">
     <div class="card h-100">
       {if $offer.banner_url}
@@ -30,10 +31,30 @@
           <i class="fas fa-clock me-1"></i>Expires: {$offer.end_at|date_format:'%b %d, %Y'}
         </div>
         {/if}
-        <div class="mt-auto">
+
+        {* Progress indicator *}
+        {if !isset($claimed_ids[$offer.id]) && isset($elig)}
+        <div class="mb-2">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small text-muted">{$elig.label|escape}</span>
+            <span class="small fw-semibold {if $elig.eligible}text-success{else}text-warning{/if}">{$elig.pct|default:0}%</span>
+          </div>
+          <div class="progress" style="height:6px">
+            <div class="progress-bar {if $elig.eligible}bg-success{else}bg-warning{/if}"
+                 style="width:{$elig.pct|default:0}%"></div>
+          </div>
+        </div>
+        {/if}
+
+        <div class="mt-auto pt-2">
           {if isset($claimed_ids[$offer.id])}
             <button class="btn btn-outline-success btn-sm w-100" disabled>
               <i class="fas fa-check me-1"></i>Claimed
+            </button>
+          {elseif isset($elig) && !$elig.eligible}
+            <button class="btn btn-outline-secondary btn-sm w-100" disabled
+                    title="Complete the task to unlock: {$elig.label|escape}">
+              <i class="fas fa-lock me-1"></i>Task Incomplete
             </button>
           {else}
             <form method="POST" action="/user/rewards/claim">

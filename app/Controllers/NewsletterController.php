@@ -26,8 +26,12 @@ class NewsletterController extends Controller
                 $this->redirect('/newsletter/subscribe');
             }
 
-            (new NewsletterGuestModel())->subscribe($email, $whatsapp);
-            $this->flash('success', 'You have been subscribed successfully!');
+            $result = (new NewsletterGuestModel())->subscribe($email, $whatsapp);
+            if ($result === 'already_subscribed') {
+                $this->flash('info', 'You are already subscribed.');
+            } else {
+                $this->flash('success', 'You have been subscribed successfully!');
+            }
             $this->redirect('/newsletter/subscribe');
         }
 

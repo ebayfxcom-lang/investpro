@@ -173,7 +173,16 @@
             <select name="recipients" class="form-select">
               <option value="all">All Users</option>
               <option value="active">Active Users Only</option>
+              <option value="subscribers">Guest Subscribers Only</option>
+              <option value="non_user_subscribers">Subscribers Not in User System</option>
+              <option value="non_deposited">Users Without Deposits</option>
             </select>
+          </div>
+          <div class="mt-2">
+            <label class="form-label fw-semibold small">Filter by Active Plan Name <span class="text-muted">(optional)</span></label>
+            <input type="text" name="plan_filter" class="form-control form-control-sm"
+                   placeholder="e.g. Gold Plan – leave blank to skip">
+            <div class="form-text">Applies only when Recipients is set to All Users or Active Users.</div>
           </div>
         </div>
         <div class="modal-footer">
@@ -214,6 +223,9 @@
             <select name="recipients" id="editNlRecipients" class="form-select">
               <option value="all">All Users</option>
               <option value="active">Active Users Only</option>
+              <option value="subscribers">Guest Subscribers Only</option>
+              <option value="non_user_subscribers">Subscribers Not in User System</option>
+              <option value="non_deposited">Users Without Deposits</option>
             </select>
           </div>
         </div>

@@ -140,7 +140,6 @@
     </div>
   </div>
 </div>
-{/block}
 
 <div class="modal fade" id="editMethodModal" tabindex="-1">
   <div class="modal-dialog">
@@ -232,3 +231,5 @@ document.querySelectorAll('.js-edit-method').forEach(function(btn) {
 });
 {/literal}
 </script>
+
+{/block}

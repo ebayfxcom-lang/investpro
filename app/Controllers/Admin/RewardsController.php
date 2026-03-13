@@ -72,6 +72,13 @@ class RewardsController extends Controller
         $page = (int)($request->get('page', 1));
         $data = $offerModel->adminPaginate($page, 20);
 
+        // Attach claim counts to each offer
+        $claimModel = new RewardClaimModel();
+        foreach ($data['items'] as &$offer) {
+            $offer['claim_count'] = $offerModel->getClaimCount((int)$offer['id']);
+        }
+        unset($offer);
+
         $this->view('admin/rewards/index', [
             'title' => 'Rewards Hub',
             'data'  => $data,

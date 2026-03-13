@@ -69,12 +69,17 @@ class SpinController extends Controller
         $history   = $historyModel->getUserHistory($userId, 20);
         $rewards   = $rewardModel->getActiveRewards();
 
+        // Pass user's USD wallet balance for purchase display
+        $walletModel = new \App\Models\WalletModel();
+        $usdBalance  = $walletModel->getBalance($userId, 'USD');
+
         $this->view('user/spin/index', [
-            'title'      => 'Spin & Earn',
-            'settings'   => $settings,
-            'user_spins' => $userSpins,
-            'history'    => $history,
-            'rewards'    => $rewards,
+            'title'       => 'Spin & Earn',
+            'settings'    => $settings,
+            'user_spins'  => $userSpins,
+            'history'     => $history,
+            'rewards'     => $rewards,
+            'usd_balance' => $usdBalance,
         ]);
     }
 }

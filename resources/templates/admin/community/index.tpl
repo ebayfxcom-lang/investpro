@@ -3,6 +3,9 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h6 class="fw-bold mb-0">Community Feed</h6>
   <div class="d-flex gap-2">
+    <button class="btn btn-sm btn-accent" data-bs-toggle="modal" data-bs-target="#createPostModal">
+      <i class="fas fa-pen me-1"></i>New Post
+    </button>
     <a href="/admin/community/keywords" class="btn btn-sm btn-outline-danger">
       <i class="fas fa-ban me-1"></i>Keywords
     </a>
@@ -90,4 +93,42 @@
   </ul>
 </nav>
 {/if}
+
+<!-- Create Post Modal -->
+<div class="modal fade" id="createPostModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-pen me-2"></i>Post to Community</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/admin/community/post">
+        <input type="hidden" name="_csrf_token" value="{$csrf_token}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Post Content <span class="text-danger">*</span></label>
+            <textarea name="content" class="form-control" rows="5" maxlength="2000"
+                      placeholder="Write your community post..." required></textarea>
+            <div class="form-text text-end"><span id="adminPostCharCount">0</span>/2000</div>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="adminPostFeatured">
+            <label class="form-check-label small" for="adminPostFeatured">Feature this post (pin at top)</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent">Publish Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+{literal}
+document.querySelector('textarea[name="content"]')?.addEventListener('input', function() {
+  document.getElementById('adminPostCharCount').textContent = this.value.length;
+});
+{/literal}
+</script>
 {/block}
