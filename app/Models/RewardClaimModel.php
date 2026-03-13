@@ -11,11 +11,15 @@ class RewardClaimModel extends Model
 
     public function hasClaimed(int $offerId, int $userId): bool
     {
-        $row = $this->db->fetchOne(
-            "SELECT id FROM reward_claims WHERE offer_id = ? AND user_id = ?",
-            [$offerId, $userId]
-        );
-        return (bool)$row;
+        try {
+            $row = $this->db->fetchOne(
+                "SELECT id FROM reward_claims WHERE offer_id = ? AND user_id = ?",
+                [$offerId, $userId]
+            );
+            return (bool)$row;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     public function claim(int $offerId, int $userId): bool
@@ -34,13 +38,38 @@ class RewardClaimModel extends Model
 
     public function getUserClaims(int $userId): array
     {
-        return $this->db->fetchAll(
-            "SELECT rc.*, ro.title, ro.reward_type, ro.reward_value
-             FROM reward_claims rc
-             JOIN reward_offers ro ON rc.offer_id = ro.id
-             WHERE rc.user_id = ?
-             ORDER BY rc.claimed_at DESC",
-            [$userId]
-        );
+        try {
+            return $this->db->fetchAll(
+                "SELECT rc.*, ro.title, ro.reward_type, ro.reward_value
+                 FROM reward_claims rc
+                 JOIN reward_offers ro ON rc.offer_id = ro.id
+                 WHERE rc.user_id = ?
+                 ORDER BY rc.claimed_at DESC",
+                [$userId]
+            );
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /**
+     * Get all claims for admin view (with user info and offer info).
+     */
+    public function getAdminClaims(int $limit = 100): array
+    {
+        try {
+            return $this->db->fetchAll(
+                "SELECT rc.*, ro.title as offer_title, ro.eligibility_rule, ro.rule_value,
+                        u.username, u.email
+                 FROM reward_claims rc
+                 JOIN reward_offers ro ON rc.offer_id = ro.id
+                 JOIN users u ON rc.user_id = u.id
+                 ORDER BY rc.claimed_at DESC
+                 LIMIT ?",
+                [$limit]
+            );
+        } catch (\Throwable) {
+            return [];
+        }
     }
 }

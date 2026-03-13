@@ -13,17 +13,20 @@ class CommunityPostModel extends Model
     {
         try {
             $total  = (int)($this->db->fetchOne(
-                "SELECT COUNT(*) as cnt FROM community_posts WHERE status = 'active'"
+                "SELECT COUNT(*) as cnt FROM community_posts WHERE status = 'active' AND is_hidden = 0"
             )['cnt'] ?? 0);
             $offset = ($page - 1) * $perPage;
             $items  = $this->db->fetchAll(
-                "SELECT p.*, u.username,
+                "SELECT p.*,
+                        COALESCE(u.username, bp.display_name, 'Community Member') AS username,
                         (SELECT COUNT(*) FROM community_comments c WHERE c.post_id = p.id AND c.status = 'active') AS comment_count,
                         (SELECT COUNT(*) FROM community_likes cl WHERE cl.post_id = p.id) AS likes_count
                  FROM community_posts p
                  LEFT JOIN users u ON p.user_id = u.id
-                 WHERE p.status = 'active'
+                 LEFT JOIN bot_profiles bp ON p.bot_id = bp.id
+                 WHERE p.status = 'active' AND p.is_hidden = 0
                  ORDER BY
+                   p.is_featured DESC,
                    CASE WHEN u.team_role_id IS NOT NULL THEN 0 ELSE 1 END ASC,
                    (SELECT COUNT(*) FROM community_likes cl WHERE cl.post_id = p.id) DESC,
                    p.created_at DESC,
@@ -54,21 +57,28 @@ class CommunityPostModel extends Model
 
     public function adminPaginate(int $page = 1, int $perPage = 20): array
     {
-        $total  = (int)($this->db->fetchOne("SELECT COUNT(*) as cnt FROM community_posts")['cnt'] ?? 0);
-        $offset = ($page - 1) * $perPage;
-        $items  = $this->db->fetchAll(
-            "SELECT p.*, u.username
-             FROM community_posts p
-             LEFT JOIN users u ON p.user_id = u.id
-             ORDER BY p.created_at DESC
-             LIMIT {$perPage} OFFSET {$offset}"
-        );
-        return [
-            'items'       => $items,
-            'total'       => $total,
-            'page'        => $page,
-            'per_page'    => $perPage,
-            'total_pages' => (int)ceil($total / $perPage),
-        ];
+        try {
+            $total  = (int)($this->db->fetchOne("SELECT COUNT(*) as cnt FROM community_posts")['cnt'] ?? 0);
+            $offset = ($page - 1) * $perPage;
+            $items  = $this->db->fetchAll(
+                "SELECT p.*,
+                        COALESCE(u.username, bp.display_name, 'Bot') AS username,
+                        (SELECT COUNT(*) FROM community_likes cl WHERE cl.post_id = p.id) AS likes_count
+                 FROM community_posts p
+                 LEFT JOIN users u ON p.user_id = u.id
+                 LEFT JOIN bot_profiles bp ON p.bot_id = bp.id
+                 ORDER BY p.created_at DESC
+                 LIMIT {$perPage} OFFSET {$offset}"
+            );
+            return [
+                'items'       => $items,
+                'total'       => $total,
+                'page'        => $page,
+                'per_page'    => $perPage,
+                'total_pages' => (int)ceil($total / $perPage),
+            ];
+        } catch (\Throwable) {
+            return ['items' => [], 'total' => 0, 'page' => $page, 'per_page' => $perPage, 'total_pages' => 0];
+        }
     }
 }

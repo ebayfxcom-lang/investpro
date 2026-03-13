@@ -100,8 +100,19 @@
                 <td class="small fw-semibold">{$offer.title|escape|truncate:40}</td>
                 <td class="small">{$offer.reward_type|replace:'_':' '|ucfirst}<br>
                   <span class="text-success fw-semibold">+{$offer.reward_value|string_format:'%.2f'}</span></td>
-                <td class="small">{$offer.eligibility_rule|replace:'_':' '|ucfirst}</td>
-                <td class="small">{$offer.impressions} views</td>
+                <td class="small">
+                  {$offer.eligibility_rule|replace:'_':' '|ucfirst}
+                  {if $offer.rule_value > 0}
+                    <span class="text-muted">(×{$offer.rule_value|string_format:'%.0f'})</span>
+                  {/if}
+                </td>
+                <td class="small">
+                  {$offer.claim_count|default:0} claimed
+                  {if $offer.max_claims > 0}
+                    / {$offer.max_claims} max
+                  {/if}
+                  <br><span class="text-muted">{$offer.impressions} views</span>
+                </td>
                 <td>
                   {if $offer.status === 'active'}<span class="badge badge-status-active">Active</span>
                   {elseif $offer.status === 'inactive'}<span class="badge badge-status-pending">Inactive</span>

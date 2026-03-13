@@ -137,6 +137,10 @@
           Daily free spins reset at midnight UTC
           ({$settings.daily_free_spins|default:1} per day).
         </p>
+        <div class="alert alert-info py-2 small mb-3">
+          <i class="fas fa-wallet me-1"></i>
+          Your account balance: <strong>${$usd_balance|default:'0.00'|string_format:'%.2f'}</strong>
+        </div>
         <form id="buySpinsForm" method="POST" action="/user/spin">
           <input type="hidden" name="_csrf_token" value="{$csrf_token}">
           <input type="hidden" name="action" value="purchase">
@@ -156,9 +160,12 @@
               <span>Total</span>
               <span id="totalCost">$5.00</span>
             </div>
+            <div id="balanceWarning" class="text-danger small mt-1 d-none">
+              Insufficient balance. Please deposit funds.
+            </div>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100">
+          <button type="submit" class="btn btn-primary w-100" id="buySpinsBtn">
             <i class="fas fa-shopping-cart me-2"></i>Buy Spins
           </button>
         </form>
@@ -425,15 +432,28 @@
     new bootstrap.Modal(document.getElementById('resultModal')).show();
   }
 
-  /* ── Purchase cost calculator ── */
-  const qtyInput  = document.querySelector('input[name="quantity"]');
-  const totalSpan = document.getElementById('totalCost');
-  const price     = parseFloat("{$settings.spin_price|default:'1.00'}") || 1;
+  /* ── Purchase cost calculator with balance check ── */
+  const qtyInput      = document.querySelector('input[name="quantity"]');
+  const totalSpan     = document.getElementById('totalCost');
+  const balanceWarn   = document.getElementById('balanceWarning');
+  const buyBtn        = document.getElementById('buySpinsBtn');
+  const price         = parseFloat("{$settings.spin_price|default:'1.00'}") || 1;
+  const usdBalance    = parseFloat("{$usd_balance|default:'0.00'}") || 0;
 
   if (qtyInput && totalSpan) {
     function updateTotal() {
-      const qty = parseInt(qtyInput.value, 10) || 0;
-      totalSpan.textContent = '$' + (qty * price).toFixed(2);
+      const qty   = parseInt(qtyInput.value, 10) || 0;
+      const total = qty * price;
+      totalSpan.textContent = '$' + total.toFixed(2);
+      if (balanceWarn && buyBtn) {
+        if (total > usdBalance) {
+          balanceWarn.classList.remove('d-none');
+          buyBtn.disabled = true;
+        } else {
+          balanceWarn.classList.add('d-none');
+          buyBtn.disabled = false;
+        }
+      }
     }
     qtyInput.addEventListener('input', updateTotal);
     updateTotal();

@@ -29,6 +29,49 @@ class CommunityController extends Controller
         ]);
     }
 
+    public function createPost(Request $request): void
+    {
+        $this->requireAuth('admin');
+
+        if (!Csrf::validateRequest($request)) {
+            $this->flash('error', 'Invalid CSRF token.');
+            $this->redirect('/admin/community');
+        }
+
+        $content = trim($request->post('content', ''));
+        if (strlen($content) < 5) {
+            $this->flash('error', 'Post must be at least 5 characters.');
+            $this->redirect('/admin/community');
+        }
+        if (strlen($content) > 2000) {
+            $this->flash('error', 'Post must be under 2000 characters.');
+            $this->redirect('/admin/community');
+        }
+
+        $content = htmlspecialchars(strip_tags($content), ENT_QUOTES, 'UTF-8');
+        $adminId = Auth::id('admin');
+
+        $postModel = new CommunityPostModel();
+        try {
+            $postId = $postModel->create([
+                'user_id'    => null,
+                'bot_id'     => null,
+                'content'    => $content,
+                'is_bot'     => 0,
+                'is_featured'=> (int)$request->post('is_featured', 0),
+                'is_hidden'  => 0,
+                'status'     => 'active',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+            (new AuditLog())->log('admin_community_post_created', "Admin post #{$postId} created", $adminId, $request->ip());
+            $this->flash('success', 'Post published to community.');
+        } catch (\Throwable $e) {
+            error_log('Admin createPost error: ' . $e->getMessage());
+            $this->flash('error', 'Could not create post. Please ensure database migrations are up to date.');
+        }
+        $this->redirect('/admin/community');
+    }
+
     public function deletePost(Request $request, array $params): void
     {
         $this->requireAuth('admin');

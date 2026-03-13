@@ -11,7 +11,11 @@ class RestrictedKeywordModel extends Model
 
     public function getAll(): array
     {
-        return $this->findAll('', [], 'keyword ASC');
+        try {
+            return $this->findAll('', [], 'keyword ASC');
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public function containsRestricted(string $content): bool

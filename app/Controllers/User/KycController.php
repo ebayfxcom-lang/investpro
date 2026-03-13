@@ -97,6 +97,7 @@ class KycController extends Controller
         $this->view('user/kyc/index', [
             'title'    => 'KYC Verification',
             'kyc'      => $existing,
+            'authUser' => Auth::user('user'),
         ]);
     }
 }

@@ -91,6 +91,7 @@ $router->get('/admin/dashboard', [Admin\DashboardController::class, 'index']);
 $router->get('/admin/users', [Admin\UsersController::class, 'index']);
 $router->get('/admin/users/add-funds', [Admin\AddFundsController::class, 'index']);
 $router->get('/admin/users/{id}', [Admin\UsersController::class, 'show']);
+$router->post('/admin/users/{id}/edit', [Admin\UsersController::class, 'edit']);
 $router->post('/admin/users/{id}/toggle-status', [Admin\UsersController::class, 'toggleStatus']);
 $router->get('/admin/users/{id}/add-funds', [Admin\UsersController::class, 'addFunds']);
 $router->post('/admin/users/{id}/add-funds', [Admin\UsersController::class, 'addFunds']);
@@ -207,6 +208,7 @@ $router->post('/admin/kyc/{id}/reject', [Admin\KycController::class, 'reject']);
 
 // Community
 $router->get('/admin/community', [Admin\CommunityController::class, 'index']);
+$router->post('/admin/community/post', [Admin\CommunityController::class, 'createPost']);
 $router->post('/admin/community/{id}/delete', [Admin\CommunityController::class, 'deletePost']);
 $router->post('/admin/community/{id}/hide', [Admin\CommunityController::class, 'hidePost']);
 $router->post('/admin/community/{id}/feature', [Admin\CommunityController::class, 'featurePost']);

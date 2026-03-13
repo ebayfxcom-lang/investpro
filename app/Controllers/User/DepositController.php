@@ -58,6 +58,25 @@ class DepositController extends Controller
             $actualCryptoAmount = $conversionService->convert($amount, $plan['currency'] ?? 'USD', $currency);
             $snapshot           = $conversionService->buildSnapshot($amount, $plan['currency'] ?? 'USD');
 
+            // Enforce minimum crypto deposit if configured for this wallet
+            if ($wallet && (float)($wallet['min_deposit'] ?? 0) > 0) {
+                $minDeposit = (float)$wallet['min_deposit'];
+                if ($actualCryptoAmount < $minDeposit) {
+                    $this->flash(
+                        'error',
+                        sprintf(
+                            'Minimum deposit for %s is %s %s. You entered approximately %s %s.',
+                            $currency,
+                            number_format($minDeposit, 8),
+                            $currency,
+                            number_format($actualCryptoAmount, 8),
+                            $currency
+                        )
+                    );
+                    $this->redirect('/user/deposit');
+                }
+            }
+
             // Store deposit intent in session and redirect to payment page
             $this->session->set('deposit_intent', [
                 'plan_id'             => $planId,

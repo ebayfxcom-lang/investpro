@@ -13,6 +13,7 @@ use App\Models\RewardClaimModel;
 use App\Models\SettingsModel;
 use App\Models\WalletModel;
 use App\Models\UserSpinModel;
+use App\Services\RewardEligibilityService;
 
 class RewardsController extends Controller
 {
@@ -29,16 +30,19 @@ class RewardsController extends Controller
         $userId     = (int)Auth::id('user');
         $offerModel = new RewardOfferModel();
         $claimModel = new RewardClaimModel();
+        $eligSvc    = new RewardEligibilityService();
 
         $activeOffers  = $offerModel->getActiveOffers();
         $expiredOffers = $offerModel->getExpiredOffers();
         $userClaims    = $claimModel->getUserClaims($userId);
         $claimedIds    = array_flip(array_column($userClaims, 'offer_id'));
 
-        // Track impressions
-        foreach ($activeOffers as $offer) {
+        // Attach eligibility/progress info to each offer
+        foreach ($activeOffers as &$offer) {
             $offerModel->incrementImpressions((int)$offer['id']);
+            $offer['eligibility'] = $eligSvc->check($userId, $offer);
         }
+        unset($offer);
 
         $this->view('user/rewards/index', [
             'title'          => 'Rewards Hub',
@@ -86,17 +90,36 @@ class RewardsController extends Controller
             $this->redirect('/user/rewards');
         }
 
-        // Apply reward
-        $walletModel   = new WalletModel();
-        $userSpinModel = new UserSpinModel();
+        // Check task eligibility
+        $eligSvc     = new RewardEligibilityService();
+        $eligibility = $eligSvc->check($userId, $offer);
+        if (!$eligibility['eligible']) {
+            $this->flash('error', 'You have not yet completed the required task: ' . $eligibility['label'] . '. Please complete it before claiming.');
+            $this->redirect('/user/rewards');
+        }
 
-        match ($offer['reward_type']) {
-            'balance_credit' => $walletModel->credit($userId, 'USD', (float)$offer['reward_value']),
-            'spin_credits'   => $userSpinModel->addPaidSpins($userId, (int)$offer['reward_value']),
-            default          => null,
-        };
+        // Apply reward using a DB transaction
+        $db = \App\Core\Database::getInstance();
+        $db->beginTransaction();
+        try {
+            $walletModel   = new WalletModel();
+            $userSpinModel = new UserSpinModel();
 
-        $claimModel->claim($offerId, $userId);
+            match ($offer['reward_type']) {
+                'balance_credit' => $walletModel->credit($userId, 'USD', (float)$offer['reward_value']),
+                'spin_credits'   => $userSpinModel->addPaidSpins($userId, (int)$offer['reward_value']),
+                default          => null,
+            };
+
+            $claimModel->claim($offerId, $userId);
+            $db->commit();
+        } catch (\Throwable $e) {
+            $db->rollBack();
+            error_log('RewardsController claim error: ' . $e->getMessage());
+            $this->flash('error', 'Could not process your claim. Please try again.');
+            $this->redirect('/user/rewards');
+        }
+
         (new AuditLog())->log('reward_claimed', "Reward offer #{$offerId} claimed", $userId, $request->ip());
         $this->flash('success', 'Reward claimed successfully!');
         $this->redirect('/user/rewards');

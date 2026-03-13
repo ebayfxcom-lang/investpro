@@ -86,6 +86,15 @@ class Database
         return $stmt->rowCount();
     }
 
+    /**
+     * Execute a raw SQL statement with bound parameters (no return value needed).
+     * Alias for query() that discards the statement.
+     */
+    public function execute(string $sql, array $params = []): void
+    {
+        $this->query($sql, $params);
+    }
+
     public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();

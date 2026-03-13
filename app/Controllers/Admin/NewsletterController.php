@@ -63,12 +63,43 @@ class NewsletterController extends Controller
                 $id = (int)$request->post('newsletter_id', 0);
                 $nl = $id > 0 ? $newsletterModel->find($id) : null;
                 if ($nl && $nl['status'] === 'draft') {
-                    // Count recipients
+                    // Count recipients based on audience type
                     $recipients = $nl['recipients'] ?? 'all';
-                    if ($recipients === 'active') {
-                        $count = $userModel->count("status = 'active'");
-                    } else {
-                        $count = $userModel->count();
+                    $guestModel = new \App\Models\NewsletterGuestModel();
+                    switch ($recipients) {
+                        case 'active':
+                            $count = $userModel->count("status = 'active'");
+                            break;
+                        case 'subscribers':
+                            $count = $guestModel->count("status = 'subscribed'");
+                            break;
+                        case 'non_user_subscribers':
+                            $count = count($guestModel->getNonUserSubscribers());
+                            break;
+                        case 'non_deposited':
+                            $count = (int)(\App\Core\Database::getInstance()->fetchOne(
+                                "SELECT COUNT(*) AS cnt FROM users u
+                                 WHERE u.status = 'active'
+                                   AND NOT EXISTS (SELECT 1 FROM deposits d WHERE d.user_id = u.id AND d.status != 'cancelled')"
+                            )['cnt'] ?? 0);
+                            break;
+                        default: // 'all'
+                            $count = $userModel->count();
+                            break;
+                    }
+                    // Plan-based filtering
+                    $planFilter = trim($request->post('plan_filter', ''));
+                    if ($planFilter !== '' && in_array($recipients, ['all', 'active'], true)) {
+                        try {
+                            $count = (int)(\App\Core\Database::getInstance()->fetchOne(
+                                "SELECT COUNT(DISTINCT d.user_id) AS cnt FROM deposits d
+                                 JOIN plans p ON d.plan_id = p.id
+                                 WHERE d.status = 'active' AND p.name = ?",
+                                [$planFilter]
+                            )['cnt'] ?? 0);
+                        } catch (\Throwable) {
+                            // keep existing count
+                        }
                     }
                     $adminUser  = Auth::user('admin');
                     $senderName = $adminUser ? ($adminUser['username'] ?? '') : '';
