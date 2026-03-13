@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `plans` (
   `roi_percent`  DECIMAL(10,4) NOT NULL DEFAULT 0.0000,
   `min_amount`   DECIMAL(20,8) NOT NULL DEFAULT 0.00000000,
   `max_amount`   DECIMAL(20,8) NOT NULL DEFAULT 0.00000000,
-  `duration`     INT           NOT NULL DEFAULT 30 COMMENT 'duration in days (legacy)',
+  `duration`     INT           NOT NULL DEFAULT 30 COMMENT 'duration in days (original field; use duration_value+duration_unit for flexible scheduling)',
   `status`       ENUM('active','inactive') NOT NULL DEFAULT 'active',
   `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`   DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
