@@ -9,13 +9,32 @@ class CommunityLikeModel extends Model
 {
     protected string $table = 'community_likes';
 
-    public function hasLiked(int $postId, int $userId): bool
+    public function hasLiked(int $postId, ?int $userId, ?int $botId = null): bool
     {
-        $row = $this->db->fetchOne(
-            "SELECT id FROM community_likes WHERE post_id = ? AND user_id = ?",
-            [$postId, $userId]
-        );
-        return (bool)$row;
+        if ($botId !== null) {
+            $row = $this->db->fetchOne(
+                "SELECT id FROM community_likes WHERE post_id = ? AND bot_id = ?",
+                [$postId, $botId]
+            );
+        } else {
+            $row = $this->db->fetchOne(
+                "SELECT id FROM community_likes WHERE post_id = ? AND user_id = ?",
+                [$postId, $userId]
+            );
+        }
+        return $row !== null && $row !== false;
+    }
+
+    public function botLike(int $postId, int $botId): void
+    {
+        try {
+            $this->db->execute(
+                "INSERT IGNORE INTO community_likes (post_id, bot_id, created_at) VALUES (?, ?, NOW())",
+                [$postId, $botId]
+            );
+        } catch (\Throwable $e) {
+            // ignore duplicate
+        }
     }
 
     public function toggle(int $postId, int $userId): bool

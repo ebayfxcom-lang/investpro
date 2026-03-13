@@ -18,6 +18,8 @@ $router->get('/faq', [HomeController::class, 'faq']);
 $router->get('/plans', [HomeController::class, 'plans']);
 $router->get('/news', [HomeController::class, 'news']);
 $router->get('/contact', [HomeController::class, 'contact']);
+$router->get('/community', [HomeController::class, 'community']);
+$router->get('/payout-proofs', [HomeController::class, 'payoutProofs']);
 
 // ============================================================
 // PUBLIC ROUTES

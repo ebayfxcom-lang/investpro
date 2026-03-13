@@ -18,11 +18,16 @@ class CommunityPostModel extends Model
             $offset = ($page - 1) * $perPage;
             $items  = $this->db->fetchAll(
                 "SELECT p.*, u.username,
-                        (SELECT COUNT(*) FROM community_comments c WHERE c.post_id = p.id AND c.status = 'active') AS comment_count
+                        (SELECT COUNT(*) FROM community_comments c WHERE c.post_id = p.id AND c.status = 'active') AS comment_count,
+                        (SELECT COUNT(*) FROM community_likes cl WHERE cl.post_id = p.id) AS likes_count
                  FROM community_posts p
                  LEFT JOIN users u ON p.user_id = u.id
                  WHERE p.status = 'active'
-                 ORDER BY p.created_at DESC
+                 ORDER BY
+                   CASE WHEN u.team_role_id IS NOT NULL THEN 0 ELSE 1 END ASC,
+                   (SELECT COUNT(*) FROM community_likes cl WHERE cl.post_id = p.id) DESC,
+                   p.created_at DESC,
+                   p.is_bot ASC
                  LIMIT {$perPage} OFFSET {$offset}"
             );
             return [

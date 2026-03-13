@@ -83,6 +83,41 @@ class HomeController extends Controller
         ]);
     }
 
+    public function community(Request $request): void
+    {
+        $page      = (int)($request->get('page', 1));
+        $postModel = new \App\Models\CommunityPostModel();
+        $feed      = $postModel->getFeed($page, 20);
+
+        $this->view('public/community', [
+            'title' => 'Community',
+            'feed'  => $feed,
+            'seo'   => $this->getSeo('community'),
+        ]);
+    }
+
+    public function payoutProofs(Request $request): void
+    {
+        $proofs = [];
+        try {
+            $db     = \App\Core\Database::getInstance();
+            $proofs = $db->fetchAll(
+                "SELECT w.id, w.amount, w.currency, w.status, w.created_at, w.proof_image,
+                        u.username
+                 FROM withdrawals w
+                 LEFT JOIN users u ON u.id = w.user_id
+                 WHERE w.status = 'approved' AND w.proof_image IS NOT NULL AND w.proof_image != ''
+                 ORDER BY w.created_at DESC LIMIT 50"
+            );
+        } catch (\Throwable $e) {}
+
+        $this->view('public/payout-proofs', [
+            'title'  => 'Payout Proofs',
+            'proofs' => $proofs,
+            'seo'    => $this->getSeo('payout-proofs'),
+        ]);
+    }
+
     private function getSeo(string $key): ?array
     {
         try {
