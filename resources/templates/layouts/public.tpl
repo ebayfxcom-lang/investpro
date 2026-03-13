@@ -51,6 +51,16 @@
     a { color: var(--pub-primary); }
     a:hover { color: #d97706; }
     .section-alt { background: rgba(22,27,34,.5); }
+    body.light-mode {
+      --pub-dark: #f8f9fa;
+      --pub-card: #ffffff;
+      --pub-text: #212529;
+      --pub-muted: #6c757d;
+      --pub-border: rgba(0,0,0,.1);
+    }
+    body.light-mode .navbar { background: rgba(248,249,250,.97); }
+    body.light-mode footer { background: #e9ecef; }
+    body.light-mode .hero { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
   </style>
 </head>
 <body>
@@ -66,12 +76,17 @@
         <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
         <li class="nav-item"><a class="nav-link" href="/plans">Plans</a></li>
         <li class="nav-item"><a class="nav-link" href="/news">News</a></li>
+        <li class="nav-item"><a class="nav-link" href="/community">Community</a></li>
+        <li class="nav-item"><a class="nav-link" href="/payout-proofs">Payout Proofs</a></li>
         <li class="nav-item"><a class="nav-link" href="/faq">FAQ</a></li>
         <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
       </ul>
       <div class="d-flex gap-2 ms-3">
         <a href="/login" class="btn btn-outline-primary btn-sm">Sign In</a>
         <a href="/register" class="btn btn-primary btn-sm">Get Started</a>
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm ms-2" title="Toggle theme">
+          <i class="fas fa-sun" id="themeIcon"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -120,5 +135,31 @@
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+{literal}
+(function() {
+  var t = localStorage.getItem('theme') || 'dark';
+  if (t === 'light') {
+    document.body.classList.add('light-mode');
+    var icon = document.getElementById('themeIcon');
+    if (icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
+  }
+})();
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    document.body.classList.toggle('light-mode');
+    var isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    var icon = document.getElementById('themeIcon');
+    if (icon) {
+      icon.classList.toggle('fa-sun', !isLight);
+      icon.classList.toggle('fa-moon', isLight);
+    }
+  });
+});
+{/literal}
+</script>
 </body>
 </html>

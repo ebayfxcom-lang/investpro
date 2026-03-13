@@ -18,6 +18,8 @@ $router->get('/faq', [HomeController::class, 'faq']);
 $router->get('/plans', [HomeController::class, 'plans']);
 $router->get('/news', [HomeController::class, 'news']);
 $router->get('/contact', [HomeController::class, 'contact']);
+$router->get('/community', [HomeController::class, 'community']);
+$router->get('/payout-proofs', [HomeController::class, 'payoutProofs']);
 
 // ============================================================
 // PUBLIC ROUTES
@@ -206,8 +208,12 @@ $router->post('/admin/kyc/{id}/reject', [Admin\KycController::class, 'reject']);
 // Community
 $router->get('/admin/community', [Admin\CommunityController::class, 'index']);
 $router->post('/admin/community/{id}/delete', [Admin\CommunityController::class, 'deletePost']);
+$router->post('/admin/community/{id}/hide', [Admin\CommunityController::class, 'hidePost']);
+$router->post('/admin/community/{id}/feature', [Admin\CommunityController::class, 'featurePost']);
 $router->get('/admin/community/bots', [Admin\CommunityController::class, 'bots']);
 $router->post('/admin/community/bots', [Admin\CommunityController::class, 'bots']);
+$router->get('/admin/community/keywords', [Admin\CommunityController::class, 'keywords']);
+$router->post('/admin/community/keywords', [Admin\CommunityController::class, 'keywords']);
 
 // Rewards Hub
 $router->get('/admin/rewards', [Admin\RewardsController::class, 'index']);

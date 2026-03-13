@@ -108,14 +108,26 @@ class SpinService
         $type  = $reward['reward_type'];
         $value = (float)$reward['reward_value'];
 
-        match ($type) {
-            'usd'        => $this->walletModel->credit($userId, 'USD', $value),
-            'eur'        => $this->walletModel->credit($userId, 'EUR', $value),
-            'bonus'      => $this->walletModel->credit($userId, 'USD', $value),
-            'spin_credits' => $this->userSpinModel->addPaidSpins($userId, (int)$value),
-            'points', 'percent_bonus', 'no_reward' => null, // handled separately if needed
-            default      => null,
-        };
+        if ($type === 'spin_credits') {
+            if ($value > 0) {
+                $this->userSpinModel->addPaidSpins($userId, (int)$value);
+            }
+            return;
+        }
+
+        if (in_array($type, ['points', 'percent_bonus', 'no_reward', ''], true)) {
+            return;
+        }
+
+        // Map legacy aliases to currency codes, then fall back to uppercased type
+        $currencyMap = ['usd' => 'USD', 'eur' => 'EUR', 'bonus' => 'USD'];
+        $currency = $currencyMap[$type] ?? strtoupper($type);
+
+        try {
+            $this->walletModel->credit($userId, $currency, $value);
+        } catch (\Throwable $e) {
+            error_log("SpinService applyReward: failed to credit {$currency}: " . $e->getMessage());
+        }
     }
 
     /**

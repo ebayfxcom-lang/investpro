@@ -24,6 +24,7 @@ class CronService
             'earnings'   => $this->processEarnings(),
             'expired'    => $this->processExpired(),
             'price_sync' => $this->syncPrices(),
+            'bot_posts'  => $this->runBots(),
             default      => $this->showHelp(),
         };
     }
@@ -53,9 +54,17 @@ class CronService
         echo "[" . date('Y-m-d H:i:s') . "] Failed: {$failedList}\n";
     }
 
+    private function runBots(): void
+    {
+        echo "[" . date('Y-m-d H:i:s') . "] Running bot activity...\n";
+        $service = new BotService();
+        $result  = $service->run();
+        echo "[" . date('Y-m-d H:i:s') . "] Done. Posts: {$result['posts']}, Likes: {$result['likes']}, Comments: {$result['comments']}\n";
+    }
+
     private function showHelp(): void
     {
         echo "Usage: php cron.php [task]\n";
-        echo "Tasks: earnings, expired, price_sync\n";
+        echo "Tasks: earnings, expired, price_sync, bot_posts\n";
     }
 }

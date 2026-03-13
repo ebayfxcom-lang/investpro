@@ -10,6 +10,7 @@ use App\Core\Csrf;
 use App\Core\AuditLog;
 use App\Models\CommunityPostModel;
 use App\Models\BotProfileModel;
+use App\Models\RestrictedKeywordModel;
 
 class CommunityController extends Controller
 {
@@ -103,5 +104,79 @@ class CommunityController extends Controller
             'bots'  => $bots,
             'admin' => Auth::user('admin'),
         ]);
+    }
+
+    public function keywords(Request $request): void
+    {
+        $this->requireAuth('admin');
+        $model = new RestrictedKeywordModel();
+
+        if ($request->isPost()) {
+            if (!Csrf::validateRequest($request)) {
+                $this->flash('error', 'Invalid CSRF token.');
+                $this->redirect('/admin/community/keywords');
+            }
+            $action = $request->post('action', '');
+            if ($action === 'add') {
+                $kw = trim($request->post('keyword', ''));
+                if ($kw) {
+                    try {
+                        $model->create(['keyword' => $kw, 'created_by' => Auth::id('admin'), 'created_at' => date('Y-m-d H:i:s')]);
+                        $this->flash('success', 'Keyword added.');
+                    } catch (\Throwable $e) {
+                        $this->flash('error', 'Keyword already exists.');
+                    }
+                }
+            } elseif ($action === 'delete') {
+                $id = (int)$request->post('keyword_id', 0);
+                if ($id > 0) {
+                    $model->delete($id);
+                    $this->flash('success', 'Keyword removed.');
+                }
+            }
+            $this->redirect('/admin/community/keywords');
+        }
+
+        $this->view('admin/community/keywords', [
+            'title'    => 'Restricted Keywords',
+            'keywords' => $model->getAll(),
+            'admin'    => Auth::user('admin'),
+        ]);
+    }
+
+    public function hidePost(Request $request, array $params): void
+    {
+        $this->requireAuth('admin');
+        if (!Csrf::validateRequest($request)) {
+            $this->flash('error', 'Invalid CSRF token.');
+            $this->redirect('/admin/community');
+        }
+        $postModel = new CommunityPostModel();
+        $post = $postModel->find((int)$params['id']);
+        if ($post) {
+            $newStatus = $post['is_hidden'] ? 0 : 1;
+            $postModel->update((int)$params['id'], ['is_hidden' => $newStatus]);
+            (new AuditLog())->log('community_post_hidden', "Post #{$params['id']} " . ($newStatus ? 'hidden' : 'unhidden'), Auth::id('admin'), $request->ip());
+            $this->flash('success', $newStatus ? 'Post hidden.' : 'Post unhidden.');
+        }
+        $this->redirect('/admin/community');
+    }
+
+    public function featurePost(Request $request, array $params): void
+    {
+        $this->requireAuth('admin');
+        if (!Csrf::validateRequest($request)) {
+            $this->flash('error', 'Invalid CSRF token.');
+            $this->redirect('/admin/community');
+        }
+        $postModel = new CommunityPostModel();
+        $post = $postModel->find((int)$params['id']);
+        if ($post) {
+            $newVal = $post['is_featured'] ? 0 : 1;
+            $postModel->update((int)$params['id'], ['is_featured' => $newVal]);
+            (new AuditLog())->log('community_post_featured', "Post #{$params['id']} " . ($newVal ? 'featured' : 'unfeatured'), Auth::id('admin'), $request->ip());
+            $this->flash('success', $newVal ? 'Post featured.' : 'Post unfeatured.');
+        }
+        $this->redirect('/admin/community');
     }
 }

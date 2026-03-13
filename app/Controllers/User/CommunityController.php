@@ -11,6 +11,7 @@ use App\Core\AuditLog;
 use App\Models\CommunityPostModel;
 use App\Models\CommunityCommentModel;
 use App\Models\CommunityLikeModel;
+use App\Models\RestrictedKeywordModel;
 use App\Models\SettingsModel;
 
 class CommunityController extends Controller
@@ -29,9 +30,17 @@ class CommunityController extends Controller
         $postModel = new CommunityPostModel();
         $feed      = $postModel->getFeed($page, 20);
 
+        $commentModel = new CommunityCommentModel();
+        foreach ($feed['items'] as &$post) {
+            $post['comments'] = $commentModel->getByPost((int)$post['id']);
+        }
+        unset($post);
+
+        $authUser = Auth::user('user');
         $this->view('user/community/index', [
-            'title' => 'Community Square',
-            'feed'  => $feed,
+            'title'    => 'Community Square',
+            'feed'     => $feed,
+            'authUser' => $authUser,
         ]);
     }
 
@@ -65,12 +74,15 @@ class CommunityController extends Controller
         // Basic profanity/spam filter
         $content = $this->sanitizeContent($content);
 
+        $keywordModel = new RestrictedKeywordModel();
+        $status = $keywordModel->containsRestricted($content) ? 'pending' : 'active';
+
         $postModel = new CommunityPostModel();
         $postId    = $postModel->create([
             'user_id'    => $userId,
             'content'    => $content,
             'is_bot'     => 0,
-            'status'     => 'active',
+            'status'     => $status,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -129,7 +141,7 @@ class CommunityController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $this->json(['success' => true, 'comment_id' => $commentId]);
+        $this->json(['success' => true, 'comment_id' => $commentId, 'content' => $content]);
     }
 
     private function sanitizeContent(string $content): string
