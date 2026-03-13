@@ -27,19 +27,27 @@ class DashboardController extends Controller
         $earningsModel   = new EarningsModel();
         $walletModel     = new WalletModel();
 
+        $defaultStats = ['total' => 0, 'active' => 0, 'pending' => 0, 'total_amount' => 0, 'pending_amount' => 0, 'today' => 0, 'banned' => 0, 'new_today' => 0];
+        try { $uStats = $userModel->getStats(); }       catch (\Throwable) { $uStats = $defaultStats; }
+        try { $dStats = $depositModel->getStats(); }    catch (\Throwable) { $dStats = $defaultStats; }
+        try { $wStats = $withdrawalModel->getStats(); } catch (\Throwable) { $wStats = $defaultStats; }
+        try { $tStats = $transModel->getStats(); }      catch (\Throwable) { $tStats = $defaultStats; }
+        try { $eStats = $earningsModel->getStats(); }   catch (\Throwable) { $eStats = $defaultStats; }
+        try { $bals  = $walletModel->getTotalBalance(); } catch (\Throwable) { $bals = []; }
+
         $stats = [
-            'users'        => $userModel->getStats(),
-            'deposits'     => $depositModel->getStats(),
-            'withdrawals'  => $withdrawalModel->getStats(),
-            'transactions' => $transModel->getStats(),
-            'earnings'     => $earningsModel->getStats(),
-            'balances'     => $walletModel->getTotalBalance(),
+            'users'        => $uStats,
+            'deposits'     => $dStats,
+            'withdrawals'  => $wStats,
+            'transactions' => $tStats,
+            'earnings'     => $eStats,
+            'balances'     => $bals,
         ];
 
-        $recentUsers        = $userModel->findAll('', [], 'created_at DESC', 10);
-        $recentDeposits     = $depositModel->findAll('', [], 'created_at DESC', 10);
-        $pendingWithdrawals = $withdrawalModel->getPending();
-        $recentLogs         = (new AuditLog())->getRecent(15);
+        try { $recentUsers        = $userModel->findAll('', [], 'created_at DESC', 10); }     catch (\Throwable) { $recentUsers = []; }
+        try { $recentDeposits     = $depositModel->findAll('', [], 'created_at DESC', 10); }  catch (\Throwable) { $recentDeposits = []; }
+        try { $pendingWithdrawals = $withdrawalModel->getPending(); }                         catch (\Throwable) { $pendingWithdrawals = []; }
+        $recentLogs = (new AuditLog())->getRecent(15);
 
         $this->view('admin/dashboard', [
             'title'              => 'Admin Dashboard',
