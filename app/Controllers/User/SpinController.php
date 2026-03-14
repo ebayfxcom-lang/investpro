@@ -39,14 +39,35 @@ class SpinController extends Controller
             $action = $request->post('action', '');
 
             if ($action === 'spin') {
-                $spinType = $request->post('spin_type', 'free');
+                // Accept both 'spin_type' and legacy 'type' parameter names from the frontend
+                $spinType = $request->post('spin_type', $request->post('type', 'free'));
                 if (!in_array($spinType, ['free', 'paid'], true)) {
-                    $this->json(['success' => false, 'error' => 'Invalid spin type.'], 400);
+                    $this->json(['success' => false, 'message' => 'Invalid spin type.'], 400);
                     return;
                 }
                 $result = $spinService->performSpin($userId, $spinType);
-                (new AuditLog())->log('spin_performed', "Spin performed ({$spinType}): " . ($result['reward']['label'] ?? 'none'), $userId, $request->ip());
-                $this->json($result);
+
+                if (!$result['success']) {
+                    (new AuditLog())->log('spin_failed', "Spin failed ({$spinType}): " . ($result['error'] ?? 'unknown'), $userId, $request->ip());
+                    $this->json(['success' => false, 'message' => $result['error'] ?? 'Spin failed. Please try again.'], 422);
+                    return;
+                }
+
+                $reward      = $result['reward'] ?? [];
+                $rewardType  = $reward['reward_type'] ?? 'no_reward';
+                $rewardValue = (float)($reward['reward_value'] ?? 0);
+
+                // Points are not used in this system – treat as no reward for display purposes
+                $displayAmount = in_array($rewardType, ['no_reward', 'points', ''], true) ? 0.0 : $rewardValue;
+
+                (new AuditLog())->log('spin_performed', "Spin ({$spinType}): {$rewardType} value={$rewardValue}", $userId, $request->ip());
+
+                $this->json([
+                    'success'      => true,
+                    'reward_type'  => $rewardType,
+                    'reward_label' => $reward['label'] ?? ($rewardType === 'no_reward' ? 'Better luck next time!' : 'No Prize'),
+                    'reward_amount'=> $displayAmount,
+                ]);
                 return;
             }
 

@@ -55,6 +55,7 @@ abstract class Controller
         $smarty->registerPlugin('modifier', 'max', fn($a, $b) => max($a, $b));
         $smarty->registerPlugin('modifier', 'abs', fn($n) => abs((float)$n));
         $smarty->registerPlugin('modifier', 'strtotime', fn($s) => strtotime((string)$s));
+        $smarty->registerPlugin('modifier', 'json_encode', fn($v, int $flags = JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) => json_encode($v, $flags));
 
         // Override built-in date_format to safely handle NULL/empty dates and
         // convert strftime-style format strings (%Y, %m, …) to date() patterns.

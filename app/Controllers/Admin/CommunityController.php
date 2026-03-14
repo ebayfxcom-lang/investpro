@@ -56,6 +56,7 @@ class CommunityController extends Controller
             $postId = $postModel->create([
                 'user_id'    => null,
                 'bot_id'     => null,
+                'admin_id'   => $adminId,
                 'content'    => $content,
                 'is_bot'     => 0,
                 'is_featured'=> (int)$request->post('is_featured', 0),
@@ -67,7 +68,7 @@ class CommunityController extends Controller
             $this->flash('success', 'Post published to community.');
         } catch (\Throwable $e) {
             error_log('Admin createPost error: ' . $e->getMessage());
-            $this->flash('error', 'Could not create post. Please ensure database migrations are up to date.');
+            $this->flash('error', 'Could not create post: ' . $e->getMessage());
         }
         $this->redirect('/admin/community');
     }

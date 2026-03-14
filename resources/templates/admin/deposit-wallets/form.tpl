@@ -17,9 +17,20 @@
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Coin / Currency Code <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold">Coin / Currency <span class="text-danger">*</span></label>
+              {if $crypto_currencies}
+              <select name="currency_code" class="form-select" required>
+                <option value="">-- Select Crypto Currency --</option>
+                {foreach $crypto_currencies as $cc}
+                <option value="{$cc.code|escape}" {if $wallet && $wallet.currency_code == $cc.code}selected{/if}>
+                  {$cc.code|escape} – {$cc.name|escape}
+                </option>
+                {/foreach}
+              </select>
+              {else}
               <input type="text" name="currency_code" class="form-control text-uppercase" maxlength="10" placeholder="e.g. BTC, ETH, USDT" value="{if $wallet}{$wallet.currency_code|escape}{/if}" required>
-              <div class="form-text">Use a short code: BTC, ETH, USDT, etc.</div>
+              {/if}
+              <div class="form-text">Only active crypto currencies are listed.</div>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Network</label>

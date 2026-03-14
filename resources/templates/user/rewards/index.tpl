@@ -80,7 +80,7 @@
 
 <!-- Expired Offers -->
 {if $expired_offers}
-<h6 class="fw-semibold text-muted mt-4 mb-3">Expired Offers</h6>
+<h6 class="fw-semibold text-muted mt-4 mb-3"><i class="fas fa-clock me-1"></i>Expired Offers</h6>
 <div class="row g-3">
   {foreach $expired_offers as $offer}
   <div class="col-md-6 col-lg-4">
@@ -88,6 +88,9 @@
       <div class="card-body">
         <h6 class="fw-bold mb-1">{$offer.title|escape}</h6>
         <span class="badge bg-secondary">Expired</span>
+        {if isset($claimed_ids[$offer.id])}
+          <span class="badge bg-success ms-1">Claimed</span>
+        {/if}
         {if $offer.end_at}
         <div class="text-muted small mt-1">Ended: {$offer.end_at|date_format:'%b %d, %Y'}</div>
         {/if}
@@ -95,6 +98,32 @@
     </div>
   </div>
   {/foreach}
+</div>
+{/if}
+
+<!-- Claim History -->
+{if $user_claims}
+<h6 class="fw-semibold text-muted mt-4 mb-3"><i class="fas fa-history me-1"></i>Your Claim History</h6>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr><th>Offer</th><th>Reward</th><th>Value</th><th>Claimed</th></tr>
+        </thead>
+        <tbody>
+          {foreach $user_claims as $claim}
+          <tr>
+            <td class="small fw-semibold">{$claim.title|escape}</td>
+            <td class="small">{$claim.reward_type|replace:'_':' '|ucfirst}</td>
+            <td class="small text-success">+{$claim.reward_value|string_format:'%.2f'}</td>
+            <td class="small text-muted">{$claim.claimed_at|date_format:'%b %d, %Y'}</td>
+          </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 {/if}
 
