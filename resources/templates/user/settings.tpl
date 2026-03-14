@@ -59,12 +59,13 @@
                      value="{$user.facebook_url|escape}" placeholder="https://facebook.com/yourprofile">
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Preferred Currency</label>
+              <label class="form-label fw-semibold">Preferred Display Currency</label>
               <select name="preferred_currency" class="form-select">
-                {foreach ['USD'=>'USD - US Dollar','EUR'=>'EUR - Euro','BTC'=>'BTC - Bitcoin','ETH'=>'ETH - Ethereum','USDT'=>'USDT - Tether'] as $code => $label}
+                {foreach ['USD'=>'USD – US Dollar','EUR'=>'EUR – Euro','GBP'=>'GBP – British Pound','JPY'=>'JPY – Japanese Yen','CAD'=>'CAD – Canadian Dollar','AUD'=>'AUD – Australian Dollar','CHF'=>'CHF – Swiss Franc','CNY'=>'CNY – Chinese Yuan','HKD'=>'HKD – Hong Kong Dollar','SGD'=>'SGD – Singapore Dollar','SEK'=>'SEK – Swedish Krona','NOK'=>'NOK – Norwegian Krone','NZD'=>'NZD – New Zealand Dollar','MXN'=>'MXN – Mexican Peso','INR'=>'INR – Indian Rupee','BRL'=>'BRL – Brazilian Real','ZAR'=>'ZAR – South African Rand','KRW'=>'KRW – South Korean Won','TRY'=>'TRY – Turkish Lira','AED'=>'AED – UAE Dirham'] as $code => $label}
                 <option value="{$code}"{if $user.preferred_currency == $code} selected{/if}>{$label}</option>
                 {/foreach}
               </select>
+              <div class="form-text">Used to estimate your crypto asset values. Fiat is display-only, not a wallet.</div>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Communication Preferences</label>

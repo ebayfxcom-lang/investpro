@@ -15,6 +15,7 @@ use App\Models\EarningsModel;
 use App\Models\WalletModel;
 use App\Models\ReferralModel;
 use App\Models\UserNoticeModel;
+use App\Models\CurrencyModel;
 
 class DashboardController extends Controller
 {
@@ -40,6 +41,43 @@ class DashboardController extends Controller
         try { $referralStats  = $referralModel->getReferralStats($userId); } catch (\Throwable) { $referralStats = ['total_referrals' => 0, 'total_earnings' => 0.0, 'pending' => 0.0]; }
         try { $totalDeposited = $depositModel->getTotalDepositsByUser($userId); } catch (\Throwable) { $totalDeposited = 0.0; }
         try { $totalEarnings  = $earningsModel->getTotalEarnings($userId); } catch (\Throwable) { $totalEarnings = 0.0; }
+
+        // Build exchange rate map for fiat estimation on dashboard (crypto → USD)
+        // Also track which currencies are fiat (type = 'fiat') for display purposes
+        $exchangeRates = [];
+        $fiatCodes     = [];
+        try {
+            $currencyModel = new CurrencyModel();
+            foreach ($currencyModel->getActiveCurrencies() as $cur) {
+                $code = $cur['code'];
+                $exchangeRates[$code] = (float)$cur['rate_to_usd'];
+                if (($cur['type'] ?? 'crypto') === 'fiat') {
+                    $fiatCodes[$code] = true;
+                }
+            }
+        } catch (\Throwable) {
+            // non-critical; fiat detection defaults to USD-only
+            $fiatCodes = ['USD' => true];
+        }
+
+        // Attach estimated USD value to each wallet for display
+        foreach ($wallets as &$wallet) {
+            $currency = $wallet['currency'] ?? '';
+            $balance  = (float)($wallet['balance'] ?? 0);
+            $isFiat   = isset($fiatCodes[$currency]);
+            if ($isFiat) {
+                // Fiat wallet: convert to USD via rate (rate = fiat_units_per_USD)
+                $rate = $exchangeRates[$currency] ?? 1.0;
+                $wallet['estimated_usd'] = ($rate > 0) ? $balance / $rate : $balance;
+                $wallet['is_crypto']     = false;
+            } else {
+                // Crypto wallet: convert to USD via rate
+                $rate = $exchangeRates[$currency] ?? null;
+                $wallet['estimated_usd'] = ($rate && $rate > 0) ? $balance / $rate : null;
+                $wallet['is_crypto']     = true;
+            }
+        }
+        unset($wallet);
 
         $userHasDeposit  = !empty($activeDeposits);
         $notices         = $noticeModel->getActiveForUser($userId, $user['account_type'] ?? 'normal', $userHasDeposit);

@@ -9,6 +9,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\AuditLog;
 use App\Models\DepositWalletModel;
+use App\Models\CurrencyModel;
 
 class DepositWalletsController extends Controller
 {
@@ -66,10 +67,12 @@ class DepositWalletsController extends Controller
             $this->redirect('/admin/deposit-wallets');
         }
 
+        $cryptoCurrencies = (new CurrencyModel())->getActiveCryptoCurrencies();
         $this->view('admin/deposit-wallets/form', [
-            'title'  => 'Add Deposit Wallet',
-            'wallet' => null,
-            'admin'  => Auth::user('admin'),
+            'title'             => 'Add Deposit Wallet',
+            'wallet'            => null,
+            'crypto_currencies' => $cryptoCurrencies,
+            'admin'             => Auth::user('admin'),
         ]);
     }
 
@@ -119,10 +122,12 @@ class DepositWalletsController extends Controller
             $this->redirect('/admin/deposit-wallets');
         }
 
+        $cryptoCurrencies = (new CurrencyModel())->getActiveCryptoCurrencies();
         $this->view('admin/deposit-wallets/form', [
-            'title'  => 'Edit Deposit Wallet',
-            'wallet' => $wallet,
-            'admin'  => Auth::user('admin'),
+            'title'             => 'Edit Deposit Wallet',
+            'wallet'            => $wallet,
+            'crypto_currencies' => $cryptoCurrencies,
+            'admin'             => Auth::user('admin'),
         ]);
     }
 

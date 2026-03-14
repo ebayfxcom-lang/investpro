@@ -206,12 +206,12 @@
                 <span class="badge badge-pending">Paid</span>
               {/if}
             </td>
-            <td class="history-reward{if !$spin.reward_amount || $spin.reward_amount == 0} miss{/if}">
+            <td class="history-reward{if !$spin.reward_value || $spin.reward_value == 0} miss{/if}">
               {$spin.reward_label|escape|default:'No Prize'}
             </td>
             <td>
-              {if $spin.reward_amount > 0}
-                <span class="text-success fw-semibold">+${$spin.reward_amount|string_format:'%.2f'}</span>
+              {if $spin.reward_value > 0}
+                <span class="text-success fw-semibold">+${$spin.reward_value|string_format:'%.2f'}</span>
               {else}
                 <span class="text-muted">—</span>
               {/if}
@@ -353,7 +353,7 @@
         body: new URLSearchParams({
           _csrf_token: csrfToken,
           action: 'spin',
-          type: spinType
+          spin_type: spinType
         })
       })
       .then(r => r.json())
@@ -410,11 +410,11 @@
         spinning = false;
         showResult(
           data.reward_amount > 0 ? '🎉' : '😔',
-          data.reward_amount > 0 ? 'You won!' : 'Better luck next time!',
+          data.reward_amount > 0 ? 'Congratulations! You won!' : 'Better luck next time!',
           data.reward_label || 'No Prize',
           data.reward_amount > 0
             ? '+$' + parseFloat(data.reward_amount).toFixed(2) + ' has been credited to your account.'
-            : 'No reward this time. Try again!'
+            : 'Try again for another chance!'
         );
         /* Reload to refresh spin count */
         setTimeout(() => window.location.reload(), 3500);

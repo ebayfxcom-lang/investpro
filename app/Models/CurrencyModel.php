@@ -14,6 +14,11 @@ class CurrencyModel extends Model
         return $this->findAll('status = ?', ['active'], 'sort_order ASC, code ASC');
     }
 
+    public function getActiveCryptoCurrencies(): array
+    {
+        return $this->findAll("status = 'active' AND type = 'crypto'", [], 'sort_order ASC, code ASC');
+    }
+
     public function findByCode(string $code): ?array
     {
         return $this->db->fetchOne("SELECT * FROM currencies WHERE code = ?", [strtoupper($code)]);
